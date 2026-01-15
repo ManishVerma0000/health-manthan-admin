@@ -131,13 +131,13 @@ export default function HospitalInformationStep({
             <Select
               label="Insurance Company"
               options={insuranceCompanies}
-              getLabel={(i) => i.insuranceCompany}
+              getLabel={(i) => i?.insuranceCompany}
               onSelect={(id) => addItem("treatmentList", id)}
             />
             <Chips
-              ids={data.treatmentList}
+              ids={data?.treatmentList}
               getName={(id) =>
-                insuranceCompanies.find((i) => i._id === id)
+                insuranceCompanies?.find((i) => i?._id === id)
                   ?.insuranceCompany || id
               }
               onRemove={(i) => removeItem("treatmentList", i)}
@@ -149,13 +149,13 @@ export default function HospitalInformationStep({
             <Select
               label="Cashless Insurance"
               options={cashlessCompanies}
-              getLabel={(i) => i.cashlessInsuranceCompany}
+              getLabel={(i) => i?.cashlessInsuranceCompany}
               onSelect={(id) => addItem("cashlessList", id)}
             />
             <Chips
-              ids={data.cashlessList}
+              ids={data?.cashlessList}
               getName={(id) =>
-                cashlessCompanies.find((i) => i._id === id)
+                cashlessCompanies?.find((i) => i._id === id)
                   ?.cashlessInsuranceCompany || id
               }
               onRemove={(i) => removeItem("cashlessList", i)}
@@ -167,13 +167,13 @@ export default function HospitalInformationStep({
             <Select
               label="Panel"
               options={governmentPanels}
-              getLabel={(i) => i.panelName}
+              getLabel={(i) => i?.panelName}
               onSelect={(id) => addItem("panelList", id)}
             />
             <Chips
-              ids={data.panelList}
+              ids={data?.panelList}
               getName={(id) =>
-                governmentPanels.find((i) => i._id === id)?.panelName || id
+                governmentPanels.find((i) => i?._id === id)?.panelName || id
               }
               onRemove={(i) => removeItem("panelList", i)}
             />
@@ -216,9 +216,9 @@ export default function HospitalInformationStep({
             <p className="text-xs text-gray-500 mt-2">Max 10 images</p>
           </div>
 
-          {data.imageUrls.length > 0 && (
+          {data?.imageUrls?.length > 0 && (
             <div className="mt-3 space-y-1">
-              {data.imageUrls.map((url: any, i: number) => (
+              {data?.imageUrls?.map((url: any, i: number) => (
                 <p key={i} className="text-xs text-green-600 truncate">
                   {url}
                 </p>
@@ -291,7 +291,7 @@ function Chips({
 }) {
   return (
     <div className="flex flex-wrap gap-2">
-      {ids.map((id, i) => (
+      {ids?.map((id, i) => (
         <span key={id} className="bg-gray-200 px-3 py-1 rounded-full text-sm">
           {getName(id)}
           <button className="ml-2" onClick={() => onRemove(i)}>
