@@ -51,7 +51,7 @@ export default function DoctorListPage() {
                 {/* IMAGE */}
                 <td className="px-4 py-3">
                   <img
-                    src={doctor.imageUrl?.[0]}
+                    src={doctor?.imageUrl?.[0]}
                     alt="Doctor"
                     className="w-14 h-14 rounded object-cover"
                   />

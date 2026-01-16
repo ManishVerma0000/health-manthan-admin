@@ -6,6 +6,7 @@ import {
   createCategoryApi,
   uploadImageApi,
 } from "@/services/category.services";
+import { useRouter } from "next/navigation";
 
 interface Errors {
   categoryName?: string;
@@ -15,12 +16,36 @@ interface Errors {
 }
 
 export default function AddCategoryPage() {
+  const router = useRouter();
+
   const [icon, setIcon] = useState<File | null>(null);
   const [images, setImages] = useState<File[]>([]);
   const [categoryName, setCategoryName] = useState("");
-  const [labelName, setLabelName] = useState("");
+  // const [labelName, setLabelName] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
+  const [status, setStatus] = useState<boolean>(true);
+
+  const [toast, setToast] = useState<{
+    show: boolean;
+    message: string;
+    type: "success" | "error" | "info";
+  }>({
+    show: false,
+    message: "",
+    type: "success",
+  });
+
+  const showToast = (
+    message: string,
+    type: "success" | "error" | "info" = "success"
+  ) => {
+    setToast({
+      show: true,
+      message,
+      type,
+    });
+  };
 
   // ---------- IMAGE HANDLERS ----------
   const handleDrop = (e: React.DragEvent) => {
@@ -44,10 +69,6 @@ export default function AddCategoryPage() {
 
     if (!categoryName.trim()) {
       newErrors.categoryName = "Category name is required";
-    }
-
-    if (!labelName.trim()) {
-      newErrors.labelName = "Label name is required";
     }
 
     if (!icon) {
@@ -74,24 +95,21 @@ export default function AddCategoryPage() {
 
       const payload = {
         categoryName,
-        labelName,
         imageUrl: imageRes.file.url,
         iconImage: iconRes.file.url,
+        status: status,
       };
 
       await createCategoryApi(payload);
-
-      alert("Category added successfully!");
-
-      // Reset form
+      showToast("category is created Successfully", "success");
       setCategoryName("");
-      setLabelName("");
       setImages([]);
       setIcon(null);
       setErrors({});
+      router.push("/category/list");
     } catch (error) {
       console.error("Create category error:", error);
-      alert("Error creating category");
+      showToast("Error creating category", "error");
     } finally {
       setLoading(false);
     }
@@ -131,39 +149,34 @@ export default function AddCategoryPage() {
             )}
           </div>
 
-          {/* LABEL NAME */}
+          {/* STATUS TOGGLE */}
           <div>
-            <div className="flex justify-between">
-              <label className="w-1/4 text-sm font-medium">
-                Label Name *
-              </label>
-              <input
-                className={`w-3/4 border px-3 py-2 rounded-md ${
-                  errors.labelName ? "border-red-500" : ""
-                }`}
-                value={labelName}
-                onChange={(e) => {
-                  setLabelName(e.target.value);
-                  setErrors((prev) => ({
-                    ...prev,
-                    labelName: undefined,
-                  }));
-                }}
-              />
+            <div className="flex justify-between items-center">
+              <label className="w-1/4 text-sm font-medium">Status *</label>
+
+              <div className="w-3/4 flex items-center">
+                <button
+                  onClick={() => setStatus((prev) => !prev)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300
+          ${status ? "bg-blue-600" : "bg-gray-300"}`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300
+            ${status ? "translate-x-6" : "translate-x-1"}`}
+                  />
+                </button>
+
+                <span className="ml-3 text-sm text-gray-600">
+                  {status ? "Active" : "Inactive"}
+                </span>
+              </div>
             </div>
-            {errors.labelName && (
-              <p className="text-red-500 text-sm mt-1 ml-[25%]">
-                {errors.labelName}
-              </p>
-            )}
           </div>
 
           {/* ICON */}
           <div>
             <div className="flex justify-between">
-              <label className="w-1/4 text-sm font-medium">
-                Icon (1:1) *
-              </label>
+              <label className="w-1/4 text-sm font-medium">Icon (1:1) *</label>
               <div className="w-3/4">
                 <label
                   className={`flex items-center gap-2 px-4 py-2 border rounded-md cursor-pointer hover:bg-gray-50 ${
@@ -186,14 +199,10 @@ export default function AddCategoryPage() {
                   />
                 </label>
                 {icon && (
-                  <p className="text-sm text-gray-500 mt-1">
-                    {icon.name}
-                  </p>
+                  <p className="text-sm text-gray-500 mt-1">{icon.name}</p>
                 )}
                 {errors.icon && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.icon}
-                  </p>
+                  <p className="text-red-500 text-sm mt-1">{errors.icon}</p>
                 )}
               </div>
             </div>
@@ -223,9 +232,7 @@ export default function AddCategoryPage() {
           </div>
 
           {errors.images && (
-            <p className="text-red-500 text-sm mt-2">
-              {errors.images}
-            </p>
+            <p className="text-red-500 text-sm mt-2">{errors.images}</p>
           )}
 
           {images.length > 0 && (

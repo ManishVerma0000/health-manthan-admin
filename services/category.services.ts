@@ -5,8 +5,6 @@ export const getCategoriesApi = async () => {
   return response.data;
 };
 
-
-
 /**
  * Upload single image (icon / category image)
  */
@@ -14,15 +12,11 @@ export const uploadImageApi = async (file: File) => {
   const formData = new FormData();
   formData.append("image", file);
 
-  const response: any = await api.post(
-    "/upload-images/image",
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
-  );
+  const response: any = await api.post("/upload-images/image", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
 
   return response.data; // { success, file: { url } }
 };
@@ -32,7 +26,7 @@ export const uploadImageApi = async (file: File) => {
  */
 export const createCategoryApi = async (payload: {
   categoryName: string;
-  labelName: string;
+  status: boolean;
   imageUrl: string;
   iconImage: string;
 }) => {

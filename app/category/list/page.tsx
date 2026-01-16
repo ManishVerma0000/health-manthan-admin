@@ -1,19 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { Pencil, Trash2 } from "lucide-react";
 import { DataTable, Column } from "../../../components/Table";
 import { getCategoriesApi } from "@/services/category.services";
 
 interface SurgeryCategory {
   id: string;
-  created: string;
   categoryName: string;
-  image: string;
-  icon: string;
-  lastUpdated: string;
-  status: string;
+  imageUrl: string;
+  iconImage: string;
+  status: boolean;
 }
 
 export default function SurgeryCategoryPage() {
@@ -24,31 +21,40 @@ export default function SurgeryCategoryPage() {
     { key: "categoryName", label: "Category Name" },
 
     {
-      key: "image",
+      key: "imageUrl",
       label: "Image",
-      render: (val) =>
-        val ? (
-          <img src={val} alt="img" width={40} height={40} className="rounded" />
-        ) : (
-          "—"
-        ),
+      render: (val) => (
+        <img
+          src={val}
+          alt="category"
+          className="w-10 h-10 rounded-md object-cover border"
+        />
+      ),
     },
 
     {
-      key: "icon",
+      key: "iconImage",
       label: "Icon",
-      render: (val) =>
-        val ? (
-          <img
-            src={val}
-            alt="icon"
-            width={40}
-            height={40}
-            className="rounded"
-          />
-        ) : (
-          "—"
-        ),
+      render: (val) => (
+        <img
+          src={val}
+          alt="icon"
+          className="w-10 h-10 rounded-md object-cover border"
+        />
+      ),
+    },
+
+    {
+      key: "status",
+      label: "Status",
+      render: (val) => (
+        <span
+          className={`px-3 py-1 text-xs rounded-full font-medium
+            ${val ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"}`}
+        >
+          {val ? "Active" : "Inactive"}
+        </span>
+      ),
     },
 
     {
@@ -56,33 +62,24 @@ export default function SurgeryCategoryPage() {
       label: "Action",
       render: (_, row) => (
         <div className="flex items-center gap-3">
-          <Pencil className="w-4 h-4 cursor-pointer text-gray-700" />
+          <Pencil className="w-4 h-4 cursor-pointer text-blue-600" />
           <Trash2 className="w-4 h-4 cursor-pointer text-red-500" />
         </div>
       ),
     },
   ];
 
-  interface SurgeryCategory {
-    created: string;
-    categoryName: string;
-    image: string;
-    icon: string;
-    lastUpdated: string;
-    status: string;
-  }
-
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const res = await getCategoriesApi();
         const mapped: SurgeryCategory[] = res.data.map((item: any) => ({
+          id: item._id,
           categoryName: item.categoryName,
-          image: item?.imageUrl,
-          icon: item?.iconImage,
-          status: "Success",
+          imageUrl: item.imageUrl,
+          iconImage: item.iconImage,
+          status: item.status,
         }));
-
         setData(mapped);
       } catch (error) {
         console.error("Error fetching categories:", error);
@@ -97,12 +94,9 @@ export default function SurgeryCategoryPage() {
   if (loading) return <p>Loading...</p>;
 
   return (
-    <div className="">
+    <div>
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Surgery Category</h2>
-        <button className="px-4 py-2 rounded-md bg-blue-600 text-white">
-          New
-        </button>
       </div>
 
       <DataTable columns={columns} data={data} />

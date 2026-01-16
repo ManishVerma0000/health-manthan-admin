@@ -4,22 +4,26 @@ import React, { useState } from "react";
 import Link from "next/link";
 import {
   Home,
-  Users,
-  Settings,
   ChevronDown,
   Menu,
   X,
   FileText,
-  BarChart,
   LayoutDashboard,
-  Hospital,
   HospitalIcon,
   User,
   Book,
-  GroupIcon,
   GrabIcon,
   NotepadText,
+  ClipboardList,
+  MessageSquare,
+  CalendarCheck,
+  Landmark,
+  ShieldCheck,
+  ChevronLeft,
+  ChevronRight,
+  Scissors,
 } from "lucide-react";
+import GovernmentIcon from "./icons/GovernmentIcon";
 
 // -----------------------------
 // TYPE
@@ -38,16 +42,20 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   {
-    label: "Dashboard",
-    href: "/",
-    icon: <Home size={18} />,
-  },
-  {
     label: "Categories",
     icon: <FileText size={18} />,
     children: [
       { label: "All Categories", href: "/category/list" },
-      { label: "Create Category Post", href: "/category/add" },
+      { label: "Add New Category", href: "/category/add" },
+    ],
+  },
+
+  {
+    label: "Surgery",
+    icon: <Scissors size={18} />,
+    children: [
+      { label: "All Surgery", href: "/surgery/list" },
+      { label: "Add New Surgery", href: "/surgery/add" },
     ],
   },
   {
@@ -78,7 +86,7 @@ const navItems: NavItem[] = [
   },
   {
     label: "Insurance",
-    icon: <Book size={18} />,
+    icon: <ShieldCheck size={18} />,
     children: [
       { label: "All Insurance", href: "/insurance-company/list" },
       { label: "Create Insurance", href: "/insurance-company/add" },
@@ -86,29 +94,29 @@ const navItems: NavItem[] = [
   },
   {
     label: "Government Panel",
-    icon: <GrabIcon size={18} />,
+    icon: <Landmark size={18} />,
     children: [
       { label: "All Govt Panel", href: "/government-panel/list" },
       { label: "Create Govt Panel", href: "/government-panel/add" },
     ],
   },
   {
-    label: "Cashless Insurance",
-    icon: <NotepadText size={18} />,
+    label: "Cashless Panel",
+    icon: <ClipboardList size={18} />,
     children: [
-      { label: "All Cashless Insurance", href: "/cashless-insurance/list" },
-      { label: "Create Cashless Insurance", href: "/cashless-insurance/add" },
+      { label: "All Cashless Panel", href: "/cashless-insurance/list" },
+      { label: "Create Cashless Panel", href: "/cashless-insurance/add" },
     ],
   },
   {
     label: "Contact Us",
-    icon: <NotepadText size={18} />,
+    icon: <MessageSquare size={18} />,
     children: [{ label: "All ContactUS Records", href: "/contact-us" }],
   },
 
   {
     label: "Appointment",
-    icon: <NotepadText size={18} />,
+    icon: <CalendarCheck size={18} />,
     children: [{ label: "All Appointment", href: "/book-appointment" }],
   },
 ];
@@ -154,10 +162,7 @@ export default function Sidebar() {
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-4 border-b">
           <div className="flex items-center gap-2">
-            <div className="h-9 w-9 bg-blue-600 rounded-lg flex items-center justify-center text-white">
-              <LayoutDashboard size={20} />
-            </div>
-            {open && <h2 className="text-lg font-semibold">Health Manthan</h2>}
+            {open && <GovernmentIcon />}
           </div>
 
           {/* Collapse Button */}
@@ -165,7 +170,7 @@ export default function Sidebar() {
             onClick={() => setOpen(!open)}
             className="hidden md:block bg-gray-100 p-2 rounded-lg hover:bg-gray-200"
           >
-            <ChevronDown
+            <ChevronRight
               size={20}
               className={`transition-transform ${
                 open ? "rotate-180" : "rotate-0"

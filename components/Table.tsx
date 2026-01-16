@@ -12,6 +12,8 @@ interface DataTableProps<T> {
 }
 
 export function DataTable<T>({ columns, data }: DataTableProps<T>) {
+  console.log(columns,'columns')
+  console.log(data,'data')
   return (
     <div className="overflow-x-auto rounded-lg border-black w-full">
       <table className="min-w-full bg-grey-50">
@@ -29,12 +31,12 @@ export function DataTable<T>({ columns, data }: DataTableProps<T>) {
         </thead>
 
         <tbody>
-          {data.map((row, idx) => (
+          {data?.map((row, idx) => (
             <tr
               key={idx}
               className="border-b-grey-20 hover:bg-gray-50 transition"
             >
-              {columns.map((col) => (
+              {columns?.map((col) => (
                 <td key={String(col.key)} className="px-4 py-3 text-sm">
                   {col.render
                     ? col.render((row as any)[col.key], row)
