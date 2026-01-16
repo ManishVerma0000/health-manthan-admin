@@ -1,3 +1,4 @@
+import api from "@/api/api";
 import axios from "axios";
 
 const API_URL = "http://localhost:3000";
@@ -8,6 +9,6 @@ export const getDoctorList = async () => {
 };
 
 export const createDoctorApi = async (payload: any) => {
-  const response = await axios.post("/doctor", payload);
+  const response = await api.post("/doctor", payload);
   return response.data;
 };

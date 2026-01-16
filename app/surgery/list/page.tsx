@@ -1,49 +1,59 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Pencil, Trash2, Loader2, Scissors, Plus, Image } from "lucide-react";
-import { getCategoriesApi } from "@/services/category.services";
-// import {router}
+import {
+  Pencil,
+  Trash2,
+  Loader2,
+  Scissors,
+  Plus,
+  Image,
+  Folder,
+} from "lucide-react";
+import { getSurgeryListApi } from "@/services/surgery.service";
 import { useRouter } from "next/navigation";
 
-interface SurgeryCategory {
+interface SurgeryItem {
   id: string;
-  categoryName: string;
-  imageUrl: string;
-  iconImage: string;
+  surgeryName: string;
+  surgeryCategory: string;
+  icon: string;
+  image: string;
   status: boolean;
 }
 
 export default function SurgeryCategoryPage() {
-    const router = useRouter();
-  
-  const [data, setData] = useState<SurgeryCategory[]>([]);
+  const [data, setData] = useState<SurgeryItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchSurgeries = async () => {
       try {
-        const res = await getCategoriesApi();
-        const mapped: SurgeryCategory[] = res.data.map((item: any) => ({
+        const res = await getSurgeryListApi();
+
+        const mapped: SurgeryItem[] = res.data.map((item: any) => ({
           id: item._id,
-          categoryName: item.categoryName,
-          imageUrl: item.imageUrl,
-          iconImage: item.iconImage,
-          status: item.status,
+          surgeryName: item.surgeryName,
+          surgeryCategory: item.surgeryCategory,
+          icon: item.icon,
+          image: item.images?.[0] || "",
+          status: true,
         }));
+
         setData(mapped);
       } catch (error) {
-        console.error("Error fetching categories:", error);
+        console.error("Error fetching surgeries:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCategories();
+    fetchSurgeries();
   }, []);
 
   return (
-    <div className="min-h-screen  p-6 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 md:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="mb-8">
@@ -54,21 +64,22 @@ export default function SurgeryCategoryPage() {
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">
-                  Surgery Categories
+                  Surgery List
                 </h1>
                 <p className="text-sm text-gray-600 mt-0.5">
-                  Manage surgery category master data
+                  Manage and organize surgery procedures
                 </p>
               </div>
             </div>
 
-            <button 
-            onClick={() => {
-                router.push('/category/add')
+            <button
+              onClick={() => {
+                router.push('/surgery/add')
               }}
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium shadow-lg shadow-indigo-200 transition-all hover:shadow-xl hover:scale-105">
+              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium shadow-lg shadow-indigo-200 transition-all hover:shadow-xl hover:scale-105"
+            >
               <Plus size={20} />
-              Add Category
+              Add Surgery
             </button>
           </div>
 
@@ -78,7 +89,9 @@ export default function SurgeryCategoryPage() {
               <div className="flex items-center gap-2">
                 <Scissors size={20} className="text-indigo-600" />
                 <div>
-                  <span className="text-xs text-gray-600 block">Total Categories</span>
+                  <span className="text-xs text-gray-600 block">
+                    Total Surgeries
+                  </span>
                   <p className="text-xl font-bold text-indigo-600">
                     {data.length}
                   </p>
@@ -88,23 +101,13 @@ export default function SurgeryCategoryPage() {
 
             <div className="bg-white rounded-xl px-5 py-2.5 border border-gray-200 shadow-sm">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <Folder size={20} className="text-blue-600" />
                 <div>
-                  <span className="text-xs text-gray-600 block">Active</span>
-                  <p className="text-xl font-bold text-green-600">
-                    {data.filter(item => item.status).length}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl px-5 py-2.5 border border-gray-200 shadow-sm">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                <div>
-                  <span className="text-xs text-gray-600 block">Inactive</span>
-                  <p className="text-xl font-bold text-red-600">
-                    {data.filter(item => !item.status).length}
+                  <span className="text-xs text-gray-600 block">
+                    Categories
+                  </span>
+                  <p className="text-xl font-bold text-blue-600">
+                    {new Set(data.map((item) => item.surgeryCategory)).size}
                   </p>
                 </div>
               </div>
@@ -117,8 +120,11 @@ export default function SurgeryCategoryPage() {
           {/* Loading State */}
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20">
-              <Loader2 className="animate-spin text-indigo-600 mb-4" size={40} />
-              <p className="text-gray-600 font-medium">Loading categories...</p>
+              <Loader2
+                className="animate-spin text-indigo-600 mb-4"
+                size={40}
+              />
+              <p className="text-gray-600 font-medium">Loading surgeries...</p>
             </div>
           ) : data.length === 0 ? (
             /* Empty State */
@@ -127,10 +133,10 @@ export default function SurgeryCategoryPage() {
                 <Scissors size={48} className="text-gray-400" />
               </div>
               <p className="text-xl font-semibold text-gray-800 mb-2">
-                No categories yet
+                No surgeries yet
               </p>
               <p className="text-sm text-gray-500 text-center max-w-sm">
-                Get started by adding your first surgery category
+                Get started by adding your first surgery procedure
               </p>
             </div>
           ) : (
@@ -142,7 +148,13 @@ export default function SurgeryCategoryPage() {
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       <div className="flex items-center gap-2">
                         <Scissors size={16} />
-                        Category Name
+                        Surgery Name
+                      </div>
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <div className="flex items-center gap-2">
+                        <Folder size={16} />
+                        Category
                       </div>
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
@@ -156,9 +168,6 @@ export default function SurgeryCategoryPage() {
                         <Image size={16} />
                         Icon
                       </div>
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Status
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       Actions
@@ -179,38 +188,44 @@ export default function SurgeryCategoryPage() {
                           </div>
                           <div>
                             <div className="text-sm font-semibold text-gray-900">
-                              {item.categoryName}
+                              {item.surgeryName}
                             </div>
                             <div className="text-xs text-gray-500">
-                              Category #{index + 1}
+                              Surgery #{index + 1}
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <img
-                          src={item.imageUrl}
-                          alt="category"
-                          className="w-12 h-12 rounded-lg object-cover border-2 border-gray-200 shadow-sm"
-                        />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <img
-                          src={item.iconImage}
-                          alt="icon"
-                          className="w-12 h-12 rounded-lg object-cover border-2 border-gray-200 shadow-sm"
-                        />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                            item.status
-                              ? "bg-green-100 text-green-700"
-                              : "bg-red-100 text-red-600"
-                          }`}
-                        >
-                          {item.status ? "Active" : "Inactive"}
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {item.surgeryCategory}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {item.image ? (
+                          <img
+                            src={item.image}
+                            alt="surgery"
+                            className="w-12 h-12 rounded-lg object-cover border-2 border-gray-200 shadow-sm"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-lg bg-gray-100 border-2 border-gray-200 flex items-center justify-center">
+                            <Image size={20} className="text-gray-400" />
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {item.icon ? (
+                          <img
+                            src={item.icon}
+                            alt="icon"
+                            className="w-12 h-12 rounded-lg object-cover border-2 border-gray-200 shadow-sm"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-lg bg-gray-100 border-2 border-gray-200 flex items-center justify-center">
+                            <Image size={20} className="text-gray-400" />
+                          </div>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">
@@ -240,7 +255,8 @@ export default function SurgeryCategoryPage() {
         {!loading && data.length > 0 && (
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-500">
-              Showing {data.length} {data.length === 1 ? "category" : "categories"}
+              Showing {data.length}{" "}
+              {data.length === 1 ? "surgery" : "surgeries"}
             </p>
           </div>
         )}

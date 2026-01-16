@@ -63,7 +63,7 @@ const navItems: NavItem[] = [
     icon: <HospitalIcon size={18} />,
     children: [
       { label: "All Hospital", href: "/hospital/list" },
-      { label: "Create Hospital", href: "/hospital/add" },
+      { label: "Create Hospital", href: "/hospital" },
     ],
   },
 
