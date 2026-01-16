@@ -2,7 +2,8 @@
 import React, { useState } from "react";
 import { ChevronLeft, Plus, X, ImageIcon } from "lucide-react";
 import { uploadImageApi } from "@/services/upload.services";
-
+import { createSurgeryApi } from "@/services/surgery.service";
+import Toast from "@/components/Toast";
 const extractImageUrl = (res: any): string => {
   return res?.file?.url || "";
 };
@@ -13,7 +14,6 @@ interface SurgeryDetails {
   diseaseNeme: string;
   recoveryTime: string;
   icon: string | null;
-  uploadIcon: string;
   surgeryCategory: string;
   duration: string;
   treatedBy: string;
@@ -58,6 +58,12 @@ const SurgeryDetailsStep: React.FC<{
   const handleInputChange = (field: keyof SurgeryDetails, value: string) => {
     onChange({ ...data, [field]: value });
   };
+
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "success" as "success" | "error" | "info",
+  });
 
   const [imageFile, setImageFile] = useState<File | null>(null);
 
@@ -550,6 +556,19 @@ const SurgeryInformationStep: React.FC<{
                 <div key={index} className="grid grid-cols-4 gap-4">
                   <input
                     type="text"
+                    placeholder="Step *"
+                    value={step.step}
+                    required
+                    onChange={(e) => {
+                      const updated = [...data.procedureTimeline];
+                      updated[index].step = e.target.value;
+                      onChange({ ...data, procedureTimeline: updated });
+                    }}
+                    className="px-3 py-2 border rounded-lg"
+                  />
+
+                  <input
+                    type="text"
                     placeholder="Type Procedure"
                     value={step.typeProcedure}
                     onChange={(e) => {
@@ -694,6 +713,7 @@ const SurgeryInformationStep: React.FC<{
               {data.recoveryTimeline.map((step, index) => (
                 <div key={index} className="grid grid-cols-3 gap-4">
                   <input
+                    placeholder="Stage (e.g. Week 1, Day 0–2)"
                     className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     value={step.stage}
                     onChange={(e) => {
@@ -704,6 +724,7 @@ const SurgeryInformationStep: React.FC<{
                   />
 
                   <input
+                    placeholder="Duration / Timeline (e.g. 7 days)"
                     className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     value={step.mention}
                     onChange={(e) => {
@@ -714,6 +735,7 @@ const SurgeryInformationStep: React.FC<{
                   />
 
                   <input
+                    placeholder="Care Instructions (e.g. Avoid heavy lifting)"
                     className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     value={step.lightCare}
                     onChange={(e) => {
@@ -781,11 +803,15 @@ const App: React.FC = () => {
     diseaseNeme: "",
     recoveryTime: "",
     icon: null,
-    uploadIcon: "",
     surgeryCategory: "",
     duration: "",
     treatedBy: "",
     costingRange: "",
+  });
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "success" as "success" | "error" | "info",
   });
 
   const [surgeryInformation, setSurgeryInformation] =
@@ -815,30 +841,49 @@ const App: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    // Combine all data for API submission
-    const fullData = {
-      ...surgeryDetails,
-      ...surgeryInformation,
-    };
-
-    console.log("Submitting data:", fullData);
-
-    // API call would go here
-    // try {
-    //   const response = await fetch('/api/surgery', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify(fullData)
-    //   });
-    //   const result = await response.json();
-    //   console.log('Success:', result);
-    // } catch (error) {
-    //   console.error('Error:', error);
-    // }
+    const invalidProcedure = surgeryInformation.procedureTimeline.some(
+      (p) => !p.step && (p.typeProcedure || p.duration || p.medication)
+    );
+    if (invalidProcedure) {
+      alert("Please fill Step in Procedure Timeline");
+      return;
+    }
+    try {
+      const payload = {
+        ...surgeryDetails,
+        ...surgeryInformation,
+        benefits: surgeryInformation.benefits.filter(Boolean),
+        risks: surgeryInformation.risks.filter(Boolean),
+        images: surgeryInformation.images.filter(Boolean),
+      };
+      console.log("FINAL PAYLOAD 👉", payload);
+      const response = await createSurgeryApi(payload);
+      console.log(response, "response");
+      // alert("Surgery created successfully");
+      setToast({
+        show: true,
+        message: "Surgery created successfully",
+        type: "success",
+      });
+    } catch (error) {
+      console.error("Create surgery failed", error);
+      alert("Something went wrong");
+      setToast({
+        show: true,
+        message: "Login failed",
+        type: "error",
+      });
+    }
   };
 
   return (
     <>
+      <Toast
+        show={toast.show}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast({ ...toast, show: false })}
+      />
       {currentStep === 1 ? (
         <SurgeryDetailsStep
           data={surgeryDetails}
