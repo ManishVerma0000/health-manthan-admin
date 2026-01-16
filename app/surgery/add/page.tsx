@@ -1,13 +1,18 @@
 "use client";
 import React, { useState } from "react";
-import { ChevronLeft, Upload, Plus, X, ImageIcon } from "lucide-react";
+import { ChevronLeft, Plus, X, ImageIcon } from "lucide-react";
+import { uploadImageApi } from "@/services/upload.services";
+
+const extractImageUrl = (res: any): string => {
+  return res?.file?.url || "";
+};
 
 // Types
 interface SurgeryDetails {
   surgeryName: string;
   diseaseNeme: string;
   recoveryTime: string;
-  icon: File | null;
+  icon: string | null;
   uploadIcon: string;
   surgeryCategory: string;
   duration: string;
@@ -27,18 +32,6 @@ interface ProcedureStep {
   medication: string;
 }
 
-interface Benefit {
-  type: string;
-  halfPrice: string;
-  easyRecovery: string;
-}
-
-interface Risk {
-  type: string;
-  halfPrice: string;
-  easyRecovery: string;
-}
-
 interface RecoveryStep {
   stage: string;
   mention: string;
@@ -47,10 +40,10 @@ interface RecoveryStep {
 
 interface SurgeryInformation {
   symptoms: Symptom[];
-  images: File[];
+  images: string[]; // uploaded image URLs
   procedureTimeline: ProcedureStep[];
-  benefits: Benefit[];
-  risks: Risk[];
+  benefits: string[];
+  risks: string[];
   recoveryTimeline: RecoveryStep[];
   faqs: { question: string; answer: string }[];
 }
@@ -67,19 +60,41 @@ const SurgeryDetailsStep: React.FC<{
   };
 
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imageUrl, setImageUrl] = useState<string>("");
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
-    if (file) setImageFile(file);
-  };
+    if (!file) return;
 
-  const handleBrowse = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setImageFile(e.target.files[0]);
+    try {
+      const res = await uploadImageApi(file);
+      const imageUrl = extractImageUrl(res);
+
+      if (!imageUrl) return;
+
+      setImageFile(file);
+      onChange({ ...data, icon: imageUrl });
+    } catch (err) {
+      console.error("Icon upload failed", err);
     }
   };
+
+  const handleBrowse = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.[0]) return;
+
+    try {
+      const res = await uploadImageApi(e.target.files[0]);
+      const imageUrl = extractImageUrl(res);
+
+      if (!imageUrl) return;
+
+      setImageFile(e.target.files[0]);
+      onChange({ ...data, icon: imageUrl });
+    } catch (err) {
+      console.error("Icon upload failed", err);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-sm">
@@ -221,25 +236,6 @@ const SurgeryDetailsStep: React.FC<{
                 </div>
               </div>
 
-              {/* <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Icon (1:1)<span className="text-red-500">*</span>
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={data.uploadIcon}
-                      onChange={(e) => handleInputChange('uploadIcon', e.target.value)}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    />
-                    <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
-                      Upload icon
-                    </button>
-                  </div>
-                </div>
-              </div> */}
-
               <div className="mt-8">
                 <h2 className="text-lg font-semibold mb-4">Costing</h2>
                 <div>
@@ -260,33 +256,34 @@ const SurgeryDetailsStep: React.FC<{
 
             {/* Right Column - Image Upload */}
             <div className="col-span-1">
-              <div>
-                <div
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={handleDrop}
-                  className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center"
-                >
-                  <ImageIcon size={50} className="text-gray-400 mb-3" />
-                  <p>Drag Image or</p>
+              <div
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={handleDrop}
+                className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center"
+              >
+                <ImageIcon size={50} className="text-gray-400 mb-3" />
+                <p>Drag Image or</p>
 
-                  <label className="text-orange-600 underline cursor-pointer">
-                    Browse
-                    <input
-                      type="file"
-                      className="hidden"
-                      onChange={handleBrowse}
-                    />
-                  </label>
-                </div>
-
-                {imageFile && <p className="text-sm mt-2">{imageFile.name}</p>}
-
-                {imageUrl && (
-                  <p className="text-green-600 text-xs mt-2 break-all">
-                    Uploaded URL: {imageUrl}
-                  </p>
-                )}
+                <label className="text-orange-600 underline cursor-pointer">
+                  Browse
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleBrowse}
+                  />
+                </label>
               </div>
+
+              {imageFile && (
+                <p className="text-sm mt-2 text-gray-600">{imageFile.name}</p>
+              )}
+
+              {data.icon && (
+                <p className="text-green-600 text-xs mt-2 break-all">
+                  Uploaded URL: {data.icon}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -340,17 +337,14 @@ const SurgeryInformationStep: React.FC<{
   const addBenefit = () => {
     onChange({
       ...data,
-      benefits: [
-        ...data.benefits,
-        { type: "", halfPrice: "", easyRecovery: "" },
-      ],
+      benefits: [...data.benefits, ""],
     });
   };
 
   const addRisk = () => {
     onChange({
       ...data,
-      risks: [...data.risks, { type: "", halfPrice: "", easyRecovery: "" }],
+      risks: [...data.risks, ""],
     });
   };
 
@@ -491,13 +485,50 @@ const SurgeryInformationStep: React.FC<{
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Images
               </label>
-              <div className="flex items-center gap-4">
-                <select className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  <option>Upload File</option>
-                </select>
-                <span className="text-sm text-gray-500">
-                  Add Images 111.jpg 0.17
-                </span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  if (!e.target.files?.[0]) return;
+
+                  try {
+                    const res = await uploadImageApi(e.target.files[0]);
+                    const imageUrl = extractImageUrl(res);
+
+                    if (!imageUrl) return;
+
+                    onChange({
+                      ...data,
+                      images: [...data.images, imageUrl],
+                    });
+                  } catch (err) {
+                    console.error("Image upload failed", err);
+                  }
+                }}
+              />
+
+              {/* Preview uploaded images */}
+              <div className="flex gap-3 mt-3 flex-wrap">
+                {data.images.map((img, index) => (
+                  <div key={index} className="relative">
+                    <img
+                      src={img}
+                      alt="uploaded"
+                      className="w-24 h-24 object-cover rounded border"
+                    />
+                    <button
+                      onClick={() =>
+                        onChange({
+                          ...data,
+                          images: data.images.filter((_, i) => i !== index),
+                        })
+                      }
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -519,23 +550,38 @@ const SurgeryInformationStep: React.FC<{
                 <div key={index} className="grid grid-cols-4 gap-4">
                   <input
                     type="text"
-                    placeholder="Step 1*"
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="Type Procedure"
+                    value={step.typeProcedure}
+                    onChange={(e) => {
+                      const updated = [...data.procedureTimeline];
+                      updated[index].typeProcedure = e.target.value;
+                      onChange({ ...data, procedureTimeline: updated });
+                    }}
+                    className="px-3 py-2 border rounded-lg"
                   />
-                  <input
-                    type="text"
-                    placeholder="Type Proc name"
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
+
                   <input
                     type="text"
                     placeholder="Duration"
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    value={step.duration}
+                    onChange={(e) => {
+                      const updated = [...data.procedureTimeline];
+                      updated[index].duration = e.target.value;
+                      onChange({ ...data, procedureTimeline: updated });
+                    }}
+                    className="px-3 py-2 border rounded-lg"
                   />
+
                   <input
                     type="text"
                     placeholder="Medication"
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    value={step.medication}
+                    onChange={(e) => {
+                      const updated = [...data.procedureTimeline];
+                      updated[index].medication = e.target.value;
+                      onChange({ ...data, procedureTimeline: updated });
+                    }}
+                    className="px-3 py-2 border rounded-lg"
                   />
                 </div>
               ))}
@@ -556,18 +602,32 @@ const SurgeryInformationStep: React.FC<{
 
             <div className="space-y-2">
               {data.benefits.map((benefit, index) => (
-                <div key={index} className="flex gap-4 items-center">
+                <div key={index} className="flex items-center gap-2">
                   <input
                     type="text"
-                    placeholder="Type here name"
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="Benefit"
+                    value={benefit}
+                    onChange={(e) => {
+                      const updated = [...data.benefits];
+                      updated[index] = e.target.value;
+                      onChange({ ...data, benefits: updated });
+                    }}
+                    className="flex-1 px-3 py-2 border rounded-lg"
                   />
-                  <span className="px-3 py-1 bg-gray-100 rounded text-sm">
-                    Half mor pple, 6 monthly
-                  </span>
-                  <span className="px-3 py-1 bg-gray-100 rounded text-sm flex items-center gap-1">
-                    Easy Recovery <X size={14} />
-                  </span>
+
+                  {index > 0 && (
+                    <button
+                      onClick={() =>
+                        onChange({
+                          ...data,
+                          benefits: data.benefits.filter((_, i) => i !== index),
+                        })
+                      }
+                      className="text-red-500"
+                    >
+                      ✕
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -587,18 +647,32 @@ const SurgeryInformationStep: React.FC<{
 
             <div className="space-y-2">
               {data.risks.map((risk, index) => (
-                <div key={index} className="flex gap-4 items-center">
+                <div key={index} className="flex items-center gap-2">
                   <input
                     type="text"
-                    placeholder="Type here name"
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="Risk"
+                    value={risk}
+                    onChange={(e) => {
+                      const updated = [...data.risks];
+                      updated[index] = e.target.value;
+                      onChange({ ...data, risks: updated });
+                    }}
+                    className="flex-1 px-3 py-2 border rounded-lg"
                   />
-                  <span className="px-3 py-1 bg-gray-100 rounded text-sm">
-                    Half mor pple, 6 monthly
-                  </span>
-                  <span className="px-3 py-1 bg-gray-100 rounded text-sm flex items-center gap-1">
-                    Easy Recovery <X size={14} />
-                  </span>
+
+                  {index > 0 && (
+                    <button
+                      onClick={() =>
+                        onChange({
+                          ...data,
+                          risks: data.risks.filter((_, i) => i !== index),
+                        })
+                      }
+                      className="text-red-500"
+                    >
+                      ✕
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -620,25 +694,40 @@ const SurgeryInformationStep: React.FC<{
               {data.recoveryTimeline.map((step, index) => (
                 <div key={index} className="grid grid-cols-3 gap-4">
                   <input
-                    type="text"
-                    placeholder="Stage 1*"
                     className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    value={step.stage}
+                    onChange={(e) => {
+                      const updated = [...data.recoveryTimeline];
+                      updated[index].stage = e.target.value;
+                      onChange({ ...data, recoveryTimeline: updated });
+                    }}
                   />
+
                   <input
-                    type="text"
-                    placeholder="Mention idea in week"
                     className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    value={step.mention}
+                    onChange={(e) => {
+                      const updated = [...data.recoveryTimeline];
+                      updated[index].mention = e.target.value;
+                      onChange({ ...data, recoveryTimeline: updated });
+                    }}
                   />
+
                   <input
-                    type="text"
-                    placeholder="Light care"
                     className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    value={step.lightCare}
+                    onChange={(e) => {
+                      const updated = [...data.recoveryTimeline];
+                      updated[index].lightCare = e.target.value;
+                      onChange({ ...data, recoveryTimeline: updated });
+                    }}
                   />
                 </div>
               ))}
             </div>
           </div>
 
+          {/* FAQ */}
           {/* FAQ */}
           <div>
             <div className="flex items-center justify-between mb-4">
@@ -650,6 +739,33 @@ const SurgeryInformationStep: React.FC<{
                 <Plus size={16} /> Add FAQ
               </button>
             </div>
+
+            {/* FAQ Inputs */}
+            {data.faqs.map((faq, index) => (
+              <div key={index} className="grid grid-cols-2 gap-4 mb-4">
+                <input
+                  placeholder="Question"
+                  value={faq.question}
+                  onChange={(e) => {
+                    const updated = [...data.faqs];
+                    updated[index].question = e.target.value;
+                    onChange({ ...data, faqs: updated });
+                  }}
+                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                />
+
+                <input
+                  placeholder="Answer"
+                  value={faq.answer}
+                  onChange={(e) => {
+                    const updated = [...data.faqs];
+                    updated[index].answer = e.target.value;
+                    onChange({ ...data, faqs: updated });
+                  }}
+                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -679,8 +795,8 @@ const App: React.FC = () => {
       procedureTimeline: [
         { step: "", typeProcedure: "", duration: "", medication: "" },
       ],
-      benefits: [{ type: "", halfPrice: "", easyRecovery: "" }],
-      risks: [{ type: "", halfPrice: "", easyRecovery: "" }],
+      benefits: [""],
+      risks: [""],
       recoveryTimeline: [{ stage: "", mention: "", lightCare: "" }],
       faqs: [],
     });
