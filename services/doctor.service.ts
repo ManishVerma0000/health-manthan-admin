@@ -1,10 +1,10 @@
 import api from "@/api/api";
 import axios from "axios";
 
-const API_URL = "http://localhost:3000";
+const API_URL = "";
 
 export const getDoctorList = async () => {
-  const res = await axios.get(`${API_URL}/doctor/list`);
+  const res = await api.get(`/doctor/list`);
   return res.data;
 };
 
