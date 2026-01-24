@@ -224,7 +224,7 @@ export default function HospitalListPage() {
                 <button
                   disabled={page === 1}
                   onClick={() => setPage(page - 1)}
-                  className="px-4 py-2 border rounded-lg disabled:opacity-50"
+                  className="px-4 py-2  rounded-lg disabled:opacity-50"
                 >
                   <ChevronLeft size={18} />
                 </button>
@@ -236,7 +236,7 @@ export default function HospitalListPage() {
                 <button
                   disabled={end >= filteredData.length}
                   onClick={() => setPage(page + 1)}
-                  className="px-4 py-2 border rounded-lg disabled:opacity-50"
+                  className="px-4 py-2  rounded-lg disabled:opacity-50"
                 >
                   <ChevronRight size={18} />
                 </button>

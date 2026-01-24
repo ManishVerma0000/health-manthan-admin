@@ -80,7 +80,9 @@ export default function BookAppointmentList() {
         </div>
 
         {/* Table */}
-        <div className="flex-1 bg-white rounded-2xl shadow-xl  -gray-100 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden h-[65vh] flex flex-col">
+
+        {/* <div className="flex-1 bg-white rounded-2xl shadow-xl  -gray-100 overflow-hidden"> */}
           <div className="h-full overflow-x-auto">
             <table className="min-w-full">
               <thead>

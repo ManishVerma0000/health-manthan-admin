@@ -115,7 +115,9 @@ export default function SurgeryCategoryPage() {
           </div>
 
           {/* Table */}
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden h-[65vh] flex flex-col">
+
+          {/* <div className="bg-white rounded-2xl shadow-xl overflow-hidden"> */}
             {loading ? (
               <div className="flex flex-col items-center py-20">
                 <Loader2
@@ -132,7 +134,7 @@ export default function SurgeryCategoryPage() {
                 </p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
+              <div className=" h-full overflow-x-auto">
                 <table className="min-w-full">
                   <thead className="bg-indigo-50">
                     <tr>

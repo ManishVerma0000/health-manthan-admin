@@ -121,7 +121,7 @@ export default function SurgeryCategoryPage() {
           </div>
 
           {/* Table Card */}
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden ">
 
             {/* Loading */}
             {loading ? (

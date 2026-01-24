@@ -64,7 +64,7 @@ export default function ContactUsList() {
         </div>
 
         {/* Content Wrapper */}
-        <div className="flex flex-col flex-1 bg-white rounded-2xl shadow-xl   overflow-hidden">
+        <div className="flex flex-col bg-white rounded-2xl shadow-xl overflow-hidden h-[65vh]">
           {/* Table */}
           <div className="flex-1 overflow-x-auto">
             <table className="min-w-full">
