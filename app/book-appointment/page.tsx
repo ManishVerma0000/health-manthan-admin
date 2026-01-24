@@ -138,12 +138,10 @@ export default function BookAppointmentList() {
                       className="hover:bg-indigo-50 transition"
                     >
                       <td className="px-6 py-4">
-                        <p className="font-semibold text-gray-900">
+                        <p className=" text-gray-900">
                           {item.name}
                         </p>
-                        <p className="text-xs text-gray-500">
-                          Booking #{index + 1 + (page - 1) * limit}
-                        </p>
+                       
                       </td>
                       <td className="px-6 py-4 text-gray-700">
                         {item.email}

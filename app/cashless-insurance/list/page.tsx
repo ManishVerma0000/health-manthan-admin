@@ -14,6 +14,7 @@ import {
   getCashlessInsuranceListApi,
   deleteCashlessInsuranceApi,
 } from "@/services/cashlessInsurance.service";
+import { useRouter } from "next/navigation";
 
 type Item = {
   _id: string;
@@ -21,6 +22,8 @@ type Item = {
 };
 
 export default function CashlessInsuranceListPage() {
+  const router = useRouter();
+
   const [list, setList] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -69,7 +72,7 @@ export default function CashlessInsuranceListPage() {
   const filteredList = list.filter((item) =>
     item.cashlessInsuranceCompany
       .toLowerCase()
-      .includes(searchTerm.toLowerCase())
+      .includes(searchTerm.toLowerCase()),
   );
 
   // ===============================
@@ -83,21 +86,21 @@ export default function CashlessInsuranceListPage() {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-200">
-                <Building2 className="text-white" size={28} />
+                <Building2 className="text-white" size={20} />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">
+                <h1 className="text-xl font-bold text-gray-900">
                   Cashless Insurance Companies
                 </h1>
-                <p className="text-sm text-gray-600">
-                  Manage and organize cashless insurance providers
-                </p>
               </div>
             </div>
 
-            <button className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium shadow-lg shadow-indigo-200 transition-all hover:shadow-xl hover:scale-105">
+            <button
+              onClick={() => router.push("/cashless-insurance/add")}
+              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium shadow-lg shadow-indigo-200 transition-all hover:shadow-xl hover:scale-105"
+            >
               <Plus size={20} />
-              Add Company
+              New
             </button>
           </div>
 
@@ -116,13 +119,6 @@ export default function CashlessInsuranceListPage() {
                 className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
-
-            <div className="bg-white rounded-xl px-5 py-2.5 border border-gray-200 shadow-sm">
-              <span className="text-sm text-gray-600">Total Companies</span>
-              <p className="text-2xl font-bold text-indigo-600">
-                {list.length}
-              </p>
-            </div>
           </div>
         </div>
 
@@ -131,7 +127,10 @@ export default function CashlessInsuranceListPage() {
           {/* Loading */}
           {loading && (
             <div className="flex flex-col items-center justify-center py-20">
-              <Loader2 className="animate-spin text-indigo-600 mb-4" size={40} />
+              <Loader2
+                className="animate-spin text-indigo-600 mb-4"
+                size={40}
+              />
               <p className="text-gray-600 font-medium">
                 Loading cashless insurance companies...
               </p>
@@ -177,9 +176,6 @@ export default function CashlessInsuranceListPage() {
                         <h3 className="font-semibold text-gray-900 text-lg mb-1 truncate pr-8">
                           {item.cashlessInsuranceCompany}
                         </h3>
-                        <p className="text-sm text-gray-500">
-                          Cashless Insurance Company
-                        </p>
                       </div>
                     </div>
 

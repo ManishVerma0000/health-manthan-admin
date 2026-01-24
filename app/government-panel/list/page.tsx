@@ -14,6 +14,7 @@ import {
   getGovernmentPanelListApi,
   deleteGovernmentPanelApi,
 } from "@/services/governmentPanel.service";
+import { useRouter } from "next/navigation";
 
 type Panel = {
   _id: string;
@@ -21,6 +22,8 @@ type Panel = {
 };
 
 export default function GovernmentPanelListPage() {
+  const router = useRouter();
+
   const [panels, setPanels] = useState<Panel[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -67,7 +70,7 @@ export default function GovernmentPanelListPage() {
   // FILTER
   // ===============================
   const filteredPanels = panels.filter((panel) =>
-    panel.panelName.toLowerCase().includes(searchTerm.toLowerCase())
+    panel.panelName.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   // ===============================
@@ -81,21 +84,22 @@ export default function GovernmentPanelListPage() {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-200">
-                <Building2 className="text-white" size={28} />
+                <Building2 className="text-white" size={20} />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">
+                <h1 className="text-xl font-bold text-gray-900">
                   Government Panels
                 </h1>
-                <p className="text-sm text-gray-600">
-                  Manage and organize government panel data
-                </p>
+               
               </div>
             </div>
 
-            <button className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium shadow-lg shadow-indigo-200 transition-all hover:shadow-xl hover:scale-105">
+            <button
+              onClick={() => router.push("/government-panel/add")}
+              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium shadow-lg shadow-indigo-200 transition-all hover:shadow-xl hover:scale-105"
+            >
               <Plus size={20} />
-              Add Panel
+              New
             </button>
           </div>
 
@@ -114,13 +118,6 @@ export default function GovernmentPanelListPage() {
                 className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
-
-            <div className="bg-white rounded-xl px-5 py-2.5 border border-gray-200 shadow-sm">
-              <span className="text-sm text-gray-600">Total Panels</span>
-              <p className="text-2xl font-bold text-indigo-600">
-                {panels.length}
-              </p>
-            </div>
           </div>
         </div>
 
@@ -129,7 +126,10 @@ export default function GovernmentPanelListPage() {
           {/* Loading */}
           {loading && (
             <div className="flex flex-col items-center justify-center py-20">
-              <Loader2 className="animate-spin text-indigo-600 mb-4" size={40} />
+              <Loader2
+                className="animate-spin text-indigo-600 mb-4"
+                size={40}
+              />
               <p className="text-gray-600 font-medium">
                 Loading government panels...
               </p>
@@ -175,9 +175,6 @@ export default function GovernmentPanelListPage() {
                         <h3 className="font-semibold text-gray-900 text-lg mb-1 truncate pr-8">
                           {panel.panelName}
                         </h3>
-                        <p className="text-sm text-gray-500">
-                          Government Panel
-                        </p>
                       </div>
                     </div>
 

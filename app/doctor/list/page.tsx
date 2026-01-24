@@ -124,7 +124,7 @@ export default function DoctorListPage() {
               className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium"
             >
               <Plus size={16} />
-              Add Doctor
+              New
             </button>
           </div>
 

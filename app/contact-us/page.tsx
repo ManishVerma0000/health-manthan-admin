@@ -60,9 +60,7 @@ export default function ContactUsList() {
           <div className="p-2 bg-indigo-600 rounded-xl shadow-lg">
             <Mail className="text-white" size={18} />
           </div>
-          <h1 className="text-xl font-bold text-gray-900">
-            Contact Inquiries
-          </h1>
+          <h1 className="text-xl font-bold text-gray-900">Contact Inquiries</h1>
         </div>
 
         {/* Content Wrapper */}
@@ -118,12 +116,7 @@ export default function ContactUsList() {
                   data.map((item, index) => (
                     <tr key={item._id} className="hover:bg-indigo-50">
                       <td className="px-6 py-4">
-                        <p className="font-semibold text-gray-900">
-                          {item.name}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          Contact #{index + 1 + (page - 1) * limit}
-                        </p>
+                        <p className=" text-gray-900">{item.name}</p>
                       </td>
                       <td className="px-6 py-4 text-gray-700">
                         {item.mobileNumber}

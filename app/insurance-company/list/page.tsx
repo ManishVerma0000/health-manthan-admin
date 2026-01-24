@@ -14,6 +14,7 @@ import {
   fetchInsuranceCompaniesApi,
   deleteInsuranceCompanyApi,
 } from "@/services/insuranceCompany.service";
+import { useRouter } from "next/navigation";
 
 type InsuranceCompany = {
   _id: string;
@@ -21,6 +22,7 @@ type InsuranceCompany = {
 };
 
 export default function InsuranceCompanyListPage() {
+  const router = useRouter();
   const [companies, setCompanies] = useState<InsuranceCompany[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -51,16 +53,14 @@ export default function InsuranceCompanyListPage() {
   // ===============================
   const deleteCompany = async (id: string) => {
     const confirmDelete = confirm(
-      "Are you sure you want to delete this insurance company?"
+      "Are you sure you want to delete this insurance company?",
     );
     if (!confirmDelete) return;
 
     try {
       const res = await deleteInsuranceCompanyApi(id);
       if (res?.success) {
-        setCompanies((prev) =>
-          prev.filter((company) => company._id !== id)
-        );
+        setCompanies((prev) => prev.filter((company) => company._id !== id));
       } else {
         alert("Delete failed");
       }
@@ -73,9 +73,7 @@ export default function InsuranceCompanyListPage() {
   // FILTER
   // ===============================
   const filteredCompanies = companies.filter((company) =>
-    company.insuranceCompany
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase())
+    company.insuranceCompany.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   // ===============================
@@ -92,16 +90,16 @@ export default function InsuranceCompanyListPage() {
                 <Building2 className="text-white" size={28} />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">
+                <h1 className="text-xl font-bold text-gray-900">
                   Insurance Companies
                 </h1>
-                <p className="text-sm text-gray-600">
-                  Manage and organize insurance company data
-                </p>
               </div>
             </div>
 
-            <button className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium shadow-lg shadow-indigo-200 transition-all hover:shadow-xl hover:scale-105">
+            <button
+              onClick={() => router.push("/insurance-company/add")}
+              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium shadow-lg shadow-indigo-200 transition-all hover:shadow-xl hover:scale-105"
+            >
               <Plus size={20} />
               Add Company
             </button>
@@ -122,13 +120,6 @@ export default function InsuranceCompanyListPage() {
                 className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
-
-            <div className="bg-white rounded-xl px-5 py-2.5 border border-gray-200 shadow-sm">
-              <span className="text-sm text-gray-600">Total Companies</span>
-              <p className="text-2xl font-bold text-indigo-600">
-                {companies.length}
-              </p>
-            </div>
           </div>
         </div>
 
@@ -137,7 +128,10 @@ export default function InsuranceCompanyListPage() {
           {/* Loading */}
           {loading && (
             <div className="flex flex-col items-center justify-center py-20">
-              <Loader2 className="animate-spin text-indigo-600 mb-4" size={40} />
+              <Loader2
+                className="animate-spin text-indigo-600 mb-4"
+                size={40}
+              />
               <p className="text-gray-600 font-medium">
                 Loading insurance companies...
               </p>
