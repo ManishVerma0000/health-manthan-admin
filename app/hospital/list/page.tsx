@@ -170,7 +170,12 @@ export default function HospitalListPage() {
 
                   <tbody className="divide-y">
                     {paginatedData.map((item, index) => (
-                      <tr key={item._id} className="hover:bg-indigo-50">
+                      // <tr key={item._id} className="hover:bg-indigo-50">
+                      <tr
+                        key={item._id}
+                        onClick={() => router.push(`/hospital/${item._id}`)}
+                        className="hover:bg-indigo-50 cursor-pointer transition"
+                      >
                         {/* Image */}
                         <td className="px-6 py-4">
                           {item.imageUrls?.length ? (

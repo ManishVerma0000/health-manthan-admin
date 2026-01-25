@@ -81,8 +81,8 @@ export default function DoctorListPage() {
       data.filter((item) =>
         `${item.hospital?.hospitalName} ${item.hospital?.city}`
           .toLowerCase()
-          .includes(q)
-      )
+          .includes(q),
+      ),
     );
 
     setPage(1);
@@ -96,7 +96,6 @@ export default function DoctorListPage() {
 
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
-
       {/* Global Header */}
       <Header
         searchValue={search}
@@ -105,18 +104,14 @@ export default function DoctorListPage() {
 
       <div className="flex-1 overflow-auto p-6 md:p-8">
         <div className="max-w-7xl mx-auto">
-
           {/* Page Header */}
           <div className="mb-6 flex items-center justify-between">
-
             <div className="flex items-center gap-3">
               <div className="p-2 bg-indigo-600 rounded-xl">
                 <Stethoscope className="text-white" size={18} />
               </div>
 
-              <h1 className="text-xl font-bold text-gray-900">
-                Doctor List
-              </h1>
+              <h1 className="text-xl font-bold text-gray-900">Doctor List</h1>
             </div>
 
             <button
@@ -130,7 +125,6 @@ export default function DoctorListPage() {
 
           {/* Table Card */}
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-
             {/* Loading */}
             {loading ? (
               <div className="flex flex-col items-center py-20">
@@ -138,33 +132,23 @@ export default function DoctorListPage() {
                   className="animate-spin text-indigo-600 mb-4"
                   size={40}
                 />
-                <p className="text-gray-600">
-                  Loading doctors...
-                </p>
+                <p className="text-gray-600">Loading doctors...</p>
               </div>
             ) : paginatedData.length === 0 ? (
-
               /* Empty */
               <div className="flex flex-col items-center py-20">
-                <Stethoscope
-                  size={48}
-                  className="text-gray-400 mb-3"
-                />
+                <Stethoscope size={48} className="text-gray-400 mb-3" />
 
                 <p className="text-lg font-semibold">
                   {search ? "No results found" : "No doctors yet"}
                 </p>
               </div>
-
             ) : (
-
               /* Table */
               <div className="overflow-x-auto">
                 <table className="min-w-full">
-
                   <thead className="bg-indigo-50">
                     <tr>
-
                       <th className="px-6 py-4 text-left text-xs font-semibold uppercase">
                         Image
                       </th>
@@ -188,23 +172,21 @@ export default function DoctorListPage() {
                       <th className="px-6 py-4 text-left text-xs font-semibold uppercase">
                         Created
                       </th>
-
                     </tr>
                   </thead>
 
                   <tbody className="divide-y">
-
                     {paginatedData.map((doctor, index) => (
                       <tr
-                        key={doctor._id}
+                        key={doctor?._id}
                         className="hover:bg-indigo-50"
+                        onClick={() => router.push(`/doctor/${doctor?._id}`)}
                       >
-
                         {/* Image */}
                         <td className="px-6 py-4">
                           {doctor.imageUrl?.length ? (
                             <img
-                              src={doctor.imageUrl[0]}
+                              src={doctor?.imageUrl?.[0]}
                               className="w-12 h-12 rounded-lg object-cover"
                             />
                           ) : (
@@ -235,7 +217,6 @@ export default function DoctorListPage() {
                         {/* Timings */}
                         <td className="px-6 py-4">
                           <div className="space-y-1">
-
                             {doctor.timings.map((t) => (
                               <div
                                 key={t._id}
@@ -244,7 +225,6 @@ export default function DoctorListPage() {
                                 {t.day}: {t.time}
                               </div>
                             ))}
-
                           </div>
                         </td>
 
@@ -257,10 +237,8 @@ export default function DoctorListPage() {
                         <td className="px-6 py-4 text-xs text-gray-500">
                           {new Date(doctor.createdAt).toLocaleDateString()}
                         </td>
-
                       </tr>
                     ))}
-
                   </tbody>
                 </table>
               </div>
@@ -270,13 +248,11 @@ export default function DoctorListPage() {
           {/* Pagination */}
           {!loading && filteredData.length > 0 && (
             <div className="mt-6 flex items-center justify-between">
-
               <p className="text-sm text-gray-600">
                 Page <span className="font-semibold">{page}</span>
               </p>
 
               <div className="flex items-center gap-2">
-
                 <button
                   disabled={page === 1}
                   onClick={() => setPage(page - 1)}
@@ -296,11 +272,9 @@ export default function DoctorListPage() {
                 >
                   <ChevronRight size={18} />
                 </button>
-
               </div>
             </div>
           )}
-
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Sidebar from "@/components/Dashboard";
+import Header from "./Header";
 
 export default function LayoutWrapper({
   children,
@@ -21,6 +22,7 @@ export default function LayoutWrapper({
           isAuthPage ? "" : "ml-68"
         }`}
       >
+        {/* <Header/> */}
         {children}
       </main>
     </>
