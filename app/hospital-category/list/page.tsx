@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import {
   Trash2,
   Loader2,
@@ -15,28 +16,50 @@ import {
   deleteHospitalCategoryApi,
 } from "@/services/hospital.service";
 
+import DeleteConfirmModal from "@/components/DeleteConfirmModal";
+import Toast from "@/components/Toast";
+
+/* ---------------- Types ---------------- */
 type Category = {
   _id: string;
   hospitalCategory: string;
 };
 
+/* ---------------- Component ---------------- */
 export default function HospitalCategoryListPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // ===============================
-  // FETCH CATEGORIES (API)
-  // ===============================
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "success" as "success" | "error" | "info",
+  });
+
+  /* ===============================
+     FETCH CATEGORIES
+  =============================== */
   const fetchCategories = async () => {
     try {
       setLoading(true);
+
       const res = await fetchHospitalCategoriesApi();
+
       if (res?.success) {
         setCategories(res.data);
       }
     } catch (error) {
-      console.error("Failed to fetch categories", error);
+      console.error("Fetch error:", error);
+
+      setToast({
+        show: true,
+        message: "Failed to load categories",
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }
@@ -46,41 +69,59 @@ export default function HospitalCategoryListPage() {
     fetchCategories();
   }, []);
 
-  // ===============================
-  // DELETE CATEGORY (API)
-  // ===============================
-  const deleteCategory = async (id: string) => {
-    const confirmDelete = confirm(
-      "Are you sure you want to delete this category?"
-    );
-    if (!confirmDelete) return;
+  /* ===============================
+     DELETE HANDLER
+  =============================== */
+  const handleDelete = async () => {
+    if (!deleteId) return;
 
     try {
-      const res = await deleteHospitalCategoryApi(id);
-      if (res?.success) {
-        setCategories((prev) =>
-          prev.filter((category) => category._id !== id)
-        );
-      } else {
-        alert("Delete failed");
-      }
+      setDeleting(true);
+
+      await deleteHospitalCategoryApi(deleteId);
+
+      setCategories((prev) => prev.filter((cat) => cat._id !== deleteId));
+
+      setDeleteId(null);
+
+      setToast({
+        show: true,
+        message: "Category deleted successfully",
+        type: "success",
+      });
     } catch (error) {
-      alert("Error deleting category");
+      console.error("Delete error:", error);
+
+      setToast({
+        show: true,
+        message: "Delete failed",
+        type: "error",
+      });
+    } finally {
+      setDeleting(false);
     }
   };
 
-  // ===============================
-  // FILTER
-  // ===============================
+  /* ===============================
+     FILTER
+  =============================== */
   const filteredCategories = categories.filter((cat) =>
-    cat.hospitalCategory.toLowerCase().includes(searchTerm.toLowerCase())
+    cat.hospitalCategory.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  // ===============================
-  // UI
-  // ===============================
+  /* ===============================
+     UI
+  =============================== */
   return (
-    <div className="min-h-screen  p-6 md:p-8">
+    <div className="min-h-screen p-6 md:p-8">
+      {/* Toast */}
+      <Toast
+        show={toast.show}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast({ ...toast, show: false })}
+      />
+
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -89,10 +130,12 @@ export default function HospitalCategoryListPage() {
               <div className="p-2 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-200">
                 <Building2 className="text-white" size={28} />
               </div>
+
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">
                   Hospital Categories
                 </h1>
+
                 <p className="text-sm text-gray-600">
                   Manage and organize hospital category data
                 </p>
@@ -112,6 +155,7 @@ export default function HospitalCategoryListPage() {
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
                 size={20}
               />
+
               <input
                 type="text"
                 placeholder="Search categories..."
@@ -123,6 +167,7 @@ export default function HospitalCategoryListPage() {
 
             <div className="bg-white rounded-xl px-5 py-2.5 border border-gray-200 shadow-sm">
               <span className="text-sm text-gray-600">Total Categories</span>
+
               <p className="text-2xl font-bold text-indigo-600">
                 {categories.length}
               </p>
@@ -135,10 +180,12 @@ export default function HospitalCategoryListPage() {
           {/* Loading */}
           {loading && (
             <div className="flex flex-col items-center justify-center py-20">
-              <Loader2 className="animate-spin text-indigo-600 mb-4" size={40} />
-              <p className="text-gray-600 font-medium">
-                Loading categories...
-              </p>
+              <Loader2
+                className="animate-spin text-indigo-600 mb-4"
+                size={40}
+              />
+
+              <p className="text-gray-600 font-medium">Loading categories...</p>
             </div>
           )}
 
@@ -148,9 +195,11 @@ export default function HospitalCategoryListPage() {
               <div className="bg-gray-100 rounded-full p-6 mb-4">
                 <FolderX size={48} className="text-gray-400" />
               </div>
+
               <p className="text-xl font-semibold text-gray-800 mb-2">
                 {searchTerm ? "No results found" : "No categories yet"}
               </p>
+
               <p className="text-sm text-gray-500 text-center max-w-sm">
                 {searchTerm
                   ? "Try adjusting your search terms"
@@ -181,15 +230,17 @@ export default function HospitalCategoryListPage() {
                         <h3 className="font-semibold text-gray-900 text-lg mb-1 truncate pr-8">
                           {category.hospitalCategory}
                         </h3>
+
                         <p className="text-sm text-gray-500">
                           Hospital Category
                         </p>
                       </div>
                     </div>
 
+                    {/* Actions */}
                     <div className="mt-4 pt-4 border-t border-gray-200 flex justify-end opacity-0 group-hover:opacity-100 transition">
                       <button
-                        onClick={() => deleteCategory(category._id)}
+                        onClick={() => setDeleteId(category._id)}
                         className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg"
                       >
                         <Trash2 size={16} />
@@ -213,6 +264,16 @@ export default function HospitalCategoryListPage() {
           </div>
         )}
       </div>
+
+      {/* Delete Modal */}
+      <DeleteConfirmModal
+        open={!!deleteId}
+        title="Delete Category"
+        description="Are you sure you want to delete this hospital category? This action cannot be undone."
+        loading={deleting}
+        onClose={() => setDeleteId(null)}
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }

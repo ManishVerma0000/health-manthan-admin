@@ -867,7 +867,7 @@ const App: React.FC = () => {
       });
     } catch (error) {
       console.error("Create surgery failed", error);
-      alert("Something went wrong");
+      // alert("Something went wrong");
       setToast({
         show: true,
         message: "Login failed",

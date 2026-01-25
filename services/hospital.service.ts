@@ -29,15 +29,12 @@ export const createHospitalApi = async (payload: any) => {
   return response.data;
 };
 
-export const createHospitalCategoryApi = async (
-  hospitalCategory: string
-) => {
+export const createHospitalCategoryApi = async (hospitalCategory: string) => {
   const res = await api.post("/hospital-category", {
     hospitalCategory,
   });
   return res.data;
 };
-
 
 // GET: list hospital categories
 export const fetchHospitalCategoriesApi = async () => {
@@ -46,11 +43,10 @@ export const fetchHospitalCategoriesApi = async () => {
 };
 
 // DELETE: hospital category by id
-export const deleteHospitalCategoryApi = async (id: string) => {
-  const res = await api.delete(`/hospital-category/${id}`);
-  return res.data;
+export const deleteHospitalApi = (id: string) => {
+  return api.delete(`/hospital/${id}`);
 };
 
-
-
-
+export const deleteHospitalCategoryApi = (id: string) => {
+  return api.delete(`/hospital-category/${id}`);
+};

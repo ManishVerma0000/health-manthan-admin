@@ -10,3 +10,8 @@ export const getSurgeryListApi = async () => {
   const res = await api.get(`/surgery/list`);
   return res.data;
 };
+
+
+export const deleteSurgeryApi = (id: string) => {
+  return api.delete(`/surgery/${id}`);
+};

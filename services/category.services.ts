@@ -33,3 +33,7 @@ export const createCategoryApi = async (payload: {
   const response: any = await api.post("/categories", payload);
   return response.data;
 };
+
+export const deleteCategoryApi = (id: string) => {
+  return api.delete(`/categories/${id}`);
+};
