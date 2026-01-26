@@ -1,9 +1,11 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ChevronLeft, Plus, X, ImageIcon } from "lucide-react";
 import { uploadImageApi } from "@/services/upload.services";
 import { createSurgeryApi } from "@/services/surgery.service";
 import Toast from "@/components/Toast";
+import { getCategoriesApi } from "@/services/category.services";
+
 const extractImageUrl = (res: any): string => {
   return res?.file?.url || "";
 };
@@ -57,6 +59,29 @@ const SurgeryDetailsStep: React.FC<{
 }> = ({ data, onChange, onNext, onBack }) => {
   const handleInputChange = (field: keyof SurgeryDetails, value: string) => {
     onChange({ ...data, [field]: value });
+  };
+
+  const [categories, setCategories] = useState<any[]>([]);
+  const [catLoading, setCatLoading] = useState(false);
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      setCatLoading(true);
+
+      const res = await getCategoriesApi();
+
+      if (res?.success) {
+        setCategories(res.data);
+      }
+    } catch (err) {
+      console.error("Fetch categories failed", err);
+    } finally {
+      setCatLoading(false);
+    }
   };
 
   const [toast, setToast] = useState({
@@ -166,6 +191,7 @@ const SurgeryDetailsStep: React.FC<{
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Surgery Category<span className="text-red-500">*</span>
                   </label>
+
                   <select
                     value={data.surgeryCategory}
                     onChange={(e) =>
@@ -173,10 +199,15 @@ const SurgeryDetailsStep: React.FC<{
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   >
-                    <option value="">Select</option>
-                    <option value="Orthopedic">Orthopedic</option>
-                    <option value="Cardiac">Cardiac</option>
-                    <option value="Neurological">Neurological</option>
+                    <option value="">
+                      {catLoading ? "Loading..." : "Select"}
+                    </option>
+
+                    {categories.map((cat) => (
+                      <option key={cat._id} value={cat._id}>
+                        {cat.categoryName}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -323,7 +354,7 @@ const SurgeryInformationStep: React.FC<{
   const updateSymptom = (
     index: number,
     field: keyof Symptom,
-    value: string
+    value: string,
   ) => {
     const updated = [...data.symptoms];
     updated[index] = { ...updated[index], [field]: value };
@@ -842,7 +873,7 @@ const App: React.FC = () => {
 
   const handleSubmit = async () => {
     const invalidProcedure = surgeryInformation.procedureTimeline.some(
-      (p) => !p.step && (p.typeProcedure || p.duration || p.medication)
+      (p) => !p.step && (p.typeProcedure || p.duration || p.medication),
     );
     if (invalidProcedure) {
       alert("Please fill Step in Procedure Timeline");

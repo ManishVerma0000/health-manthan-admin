@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   ChevronRight,
   Scissors,
+  Stethoscope,
 } from "lucide-react";
 import GovernmentIcon from "./icons/GovernmentIcon";
 
@@ -37,6 +38,11 @@ const navItems: NavItem[] = [
     label: "Categories",
     href: "/category/list",
     icon: <FileText size={18} />,
+  },
+  {
+    label: "TreatedBy",
+    href: "/treated-by/list",
+    icon: <Stethoscope  size={18} />,
   },
   {
     label: "Surgery",
