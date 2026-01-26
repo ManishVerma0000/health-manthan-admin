@@ -51,7 +51,6 @@ export const deleteHospitalCategoryApi = (id: string) => {
   return api.delete(`/hospital-category/${id}`);
 };
 
-
 export const getHospitalById = async (id: string) => {
   const res = await api.get(`/hospital/${id}`);
   return res.data;

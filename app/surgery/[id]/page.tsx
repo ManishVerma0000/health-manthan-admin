@@ -17,7 +17,10 @@ interface SurgeryData {
   diseaseNeme: string;
   duration: string;
   recoveryTime: string;
-  treatedBy: string;
+  treatedBy: {
+    _id: string;
+    treatedByName: string;
+  };
   icon: string;
   images: string[];
 
@@ -144,7 +147,9 @@ const EyeSurgeryDetails: React.FC = () => {
 
                 <div className="border-l-4 border-blue-600 pl-3">
                   <p className="text-xs text-gray-500 mb-1">Treated By</p>
-                  <p className="text-sm font-medium">{surgery.treatedBy}</p>
+                  <p className="text-sm font-medium">
+                    {surgery.treatedBy?.treatedByName}
+                  </p>
                 </div>
               </div>
 
@@ -205,7 +210,8 @@ const EyeSurgeryDetails: React.FC = () => {
                     </p>
 
                     <p>
-                      <b>Treated By:</b> {surgery.treatedBy}
+                      <b>Treated By:</b>{" "}
+                      {surgery.treatedBy?.treatedByName || "N/A"}
                     </p>
                   </div>
                 )}

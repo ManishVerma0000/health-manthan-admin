@@ -6,6 +6,7 @@ import { createSurgeryApi } from "@/services/surgery.service";
 import Toast from "@/components/Toast";
 import { getCategoriesApi } from "@/services/category.services";
 import { getTreatedByListApi } from "@/services/treatedBy.service";
+import { useRouter } from "next/navigation";
 
 const extractImageUrl = (res: any): string => {
   return res?.file?.url || "";
@@ -1153,6 +1154,7 @@ const SurgeryInformationStep: React.FC<{
 
 // Main App Component
 const App: React.FC = () => {
+  const router=useRouter()
   const [currentStep, setCurrentStep] = useState(1);
   const [surgeryDetails, setSurgeryDetails] = useState<SurgeryDetails>({
     surgeryName: "",
@@ -1224,6 +1226,10 @@ const App: React.FC = () => {
         message: "Surgery created successfully",
         type: "success",
       });
+
+      setTimeout(() => {
+          router.push('/surgery/list')
+      }, 100);
     } catch (error) {
       console.error("Create surgery failed", error);
       // alert("Something went wrong");
