@@ -5,6 +5,7 @@ import { uploadImageApi } from "@/services/upload.services";
 import { createSurgeryApi } from "@/services/surgery.service";
 import Toast from "@/components/Toast";
 import { getCategoriesApi } from "@/services/category.services";
+import { getTreatedByListApi } from "@/services/treatedBy.service";
 
 const extractImageUrl = (res: any): string => {
   return res?.file?.url || "";
@@ -20,6 +21,7 @@ interface SurgeryDetails {
   duration: string;
   treatedBy: string;
   costingRange: string;
+  paragraph: string;
 }
 
 interface Symptom {
@@ -48,6 +50,7 @@ interface SurgeryInformation {
   risks: string[];
   recoveryTimeline: RecoveryStep[];
   faqs: { question: string; answer: string }[];
+  paragraph: string;
 }
 
 // Step 1: Surgery Details Component
@@ -57,16 +60,70 @@ const SurgeryDetailsStep: React.FC<{
   onNext: () => void;
   onBack: () => void;
 }> = ({ data, onChange, onNext, onBack }) => {
+  const [errors, setErrors] = useState<Partial<Record<keyof SurgeryDetails, string>>>({});
+
   const handleInputChange = (field: keyof SurgeryDetails, value: string) => {
     onChange({ ...data, [field]: value });
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors({ ...errors, [field]: "" });
+    }
+  };
+
+  const validate = (): boolean => {
+    const newErrors: Partial<Record<keyof SurgeryDetails, string>> = {};
+    
+    if (!data.surgeryName.trim()) {
+      newErrors.surgeryName = "Surgery Name is required";
+    }
+    if (!data.surgeryCategory) {
+      newErrors.surgeryCategory = "Surgery Category is required";
+    }
+    if (!data.duration.trim()) {
+      newErrors.duration = "Duration is required";
+    }
+    if (!data.recoveryTime.trim()) {
+      newErrors.recoveryTime = "Recovery Time is required";
+    }
+    if (!data.costingRange.trim()) {
+      newErrors.costingRange = "Costing Range is required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleNextClick = () => {
+    if (validate()) {
+      onNext();
+    }
   };
 
   const [categories, setCategories] = useState<any[]>([]);
   const [catLoading, setCatLoading] = useState(false);
+  const [treatedByList, setTreatedByList] = useState<any[]>([]);
+  const [treatedByLoading, setTreatedByLoading] = useState(false);
 
   useEffect(() => {
     fetchCategories();
+    fetchTreatedBy();
   }, []);
+
+  const fetchTreatedBy = async () => {
+    try {
+      setTreatedByLoading(true);
+
+      const res = await getTreatedByListApi();
+
+      if (res?.success) {
+        setTreatedByList(res.data);
+      }
+    } catch (err) {
+      console.error("Fetch treatedBy failed", err);
+    } finally {
+      setTreatedByLoading(false);
+    }
+  };
 
   const fetchCategories = async () => {
     try {
@@ -141,7 +198,7 @@ const SurgeryDetailsStep: React.FC<{
               Back to Listing
             </button>
             <button
-              onClick={onNext}
+              onClick={handleNextClick}
               className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
             >
               Save & Next
@@ -184,8 +241,13 @@ const SurgeryDetailsStep: React.FC<{
                     onChange={(e) =>
                       handleInputChange("surgeryName", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                      errors.surgeryName ? "border-red-500" : "border-gray-300"
+                    }`}
                   />
+                  {errors.surgeryName && (
+                    <p className="text-red-500 text-xs mt-1">{errors.surgeryName}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -197,7 +259,9 @@ const SurgeryDetailsStep: React.FC<{
                     onChange={(e) =>
                       handleInputChange("surgeryCategory", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                      errors.surgeryCategory ? "border-red-500" : "border-gray-300"
+                    }`}
                   >
                     <option value="">
                       {catLoading ? "Loading..." : "Select"}
@@ -209,6 +273,9 @@ const SurgeryDetailsStep: React.FC<{
                       </option>
                     ))}
                   </select>
+                  {errors.surgeryCategory && (
+                    <p className="text-red-500 text-xs mt-1">{errors.surgeryCategory}</p>
+                  )}
                 </div>
               </div>
 
@@ -236,8 +303,13 @@ const SurgeryDetailsStep: React.FC<{
                     onChange={(e) =>
                       handleInputChange("duration", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                      errors.duration ? "border-red-500" : "border-gray-300"
+                    }`}
                   />
+                  {errors.duration && (
+                    <p className="text-red-500 text-xs mt-1">{errors.duration}</p>
+                  )}
                 </div>
               </div>
 
@@ -252,8 +324,13 @@ const SurgeryDetailsStep: React.FC<{
                     onChange={(e) =>
                       handleInputChange("recoveryTime", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                      errors.recoveryTime ? "border-red-500" : "border-gray-300"
+                    }`}
                   />
+                  {errors.recoveryTime && (
+                    <p className="text-red-500 text-xs mt-1">{errors.recoveryTime}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -266,9 +343,15 @@ const SurgeryDetailsStep: React.FC<{
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   >
-                    <option value="">Select</option>
-                    <option value="General Surgeon">General Surgeon</option>
-                    <option value="Specialist">Specialist</option>
+                    <option value="">
+                      {treatedByLoading ? "Loading..." : "Select"}
+                    </option>
+
+                    {treatedByList.map((item) => (
+                      <option key={item._id} value={item._id}>
+                        {item.treatedByName}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -285,8 +368,13 @@ const SurgeryDetailsStep: React.FC<{
                     onChange={(e) =>
                       handleInputChange("costingRange", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                      errors.costingRange ? "border-red-500" : "border-gray-300"
+                    }`}
                   />
+                  {errors.costingRange && (
+                    <p className="text-red-500 text-xs mt-1">{errors.costingRange}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -337,6 +425,11 @@ const SurgeryInformationStep: React.FC<{
   onBack: () => void;
   onSubmit: () => void;
 }> = ({ surgeryDetails, data, onChange, onBack, onSubmit }) => {
+  const [errors, setErrors] = useState<{
+    symptoms?: Record<number, { subcategory?: string }>;
+    procedureTimeline?: Record<number, { step?: string }>;
+  }>({});
+
   const addSymptom = () => {
     onChange({
       ...data,
@@ -349,6 +442,12 @@ const SurgeryInformationStep: React.FC<{
       ...data,
       symptoms: data.symptoms.filter((_, i) => i !== index),
     });
+    // Clear error for removed symptom
+    const newErrors = { ...errors };
+    if (newErrors.symptoms?.[index]) {
+      delete newErrors.symptoms[index];
+      setErrors(newErrors);
+    }
   };
 
   const updateSymptom = (
@@ -359,6 +458,17 @@ const SurgeryInformationStep: React.FC<{
     const updated = [...data.symptoms];
     updated[index] = { ...updated[index], [field]: value };
     onChange({ ...data, symptoms: updated });
+    // Clear error when user starts typing
+    if (errors.symptoms?.[index]?.subcategory && field === "subcategory") {
+      const newErrors = { ...errors };
+      if (newErrors.symptoms?.[index]) {
+        delete newErrors.symptoms[index].subcategory;
+        if (Object.keys(newErrors.symptoms[index]).length === 0) {
+          delete newErrors.symptoms[index];
+        }
+      }
+      setErrors(newErrors);
+    }
   };
 
   const addProcedureStep = () => {
@@ -402,6 +512,40 @@ const SurgeryInformationStep: React.FC<{
     });
   };
 
+  const validate = (): boolean => {
+    const newErrors: {
+      symptoms?: Record<number, { subcategory?: string }>;
+      procedureTimeline?: Record<number, { step?: string }>;
+    } = {};
+
+    // Validate symptoms
+    data.symptoms.forEach((symptom, index) => {
+      if (!symptom.subcategory.trim()) {
+        if (!newErrors.symptoms) newErrors.symptoms = {};
+        if (!newErrors.symptoms[index]) newErrors.symptoms[index] = {};
+        newErrors.symptoms[index].subcategory = "Subcategory Details is required";
+      }
+    });
+
+    // Validate procedure timeline
+    data.procedureTimeline.forEach((step, index) => {
+      if (!step.step.trim() && (step.typeProcedure || step.duration || step.medication)) {
+        if (!newErrors.procedureTimeline) newErrors.procedureTimeline = {};
+        if (!newErrors.procedureTimeline[index]) newErrors.procedureTimeline[index] = {};
+        newErrors.procedureTimeline[index].step = "Step is required";
+      }
+    });
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmitClick = () => {
+    if (validate()) {
+      onSubmit();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-sm">
@@ -417,7 +561,7 @@ const SurgeryInformationStep: React.FC<{
               Back to Listing
             </button>
             <button
-              onClick={onSubmit}
+              onClick={handleSubmitClick}
               className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
             >
               Save & Next
@@ -466,6 +610,10 @@ const SurgeryInformationStep: React.FC<{
                   Paragraph
                 </label>
                 <input
+                  onChange={(e) =>
+                    onChange({ ...data, paragraph: e.target.value })
+                  }
+                  value={data.paragraph}
                   type="text"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
@@ -491,8 +639,15 @@ const SurgeryInformationStep: React.FC<{
                     onChange={(e) =>
                       updateSymptom(index, "subcategory", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                      errors.symptoms?.[index]?.subcategory ? "border-red-500" : "border-gray-300"
+                    }`}
                   />
+                  {errors.symptoms?.[index]?.subcategory && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.symptoms[index].subcategory}
+                    </p>
+                  )}
                 </div>
                 <div className="relative">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -584,55 +739,77 @@ const SurgeryInformationStep: React.FC<{
 
             <div className="space-y-4">
               {data.procedureTimeline.map((step, index) => (
-                <div key={index} className="grid grid-cols-4 gap-4">
-                  <input
-                    type="text"
-                    placeholder="Step *"
-                    value={step.step}
-                    required
-                    onChange={(e) => {
-                      const updated = [...data.procedureTimeline];
-                      updated[index].step = e.target.value;
-                      onChange({ ...data, procedureTimeline: updated });
-                    }}
-                    className="px-3 py-2 border rounded-lg"
-                  />
+                <div key={index}>
+                  <div className="grid grid-cols-4 gap-4">
+                    <div>
+                      <input
+                        type="text"
+                        placeholder="Step *"
+                        value={step.step}
+                        required
+                        onChange={(e) => {
+                          const updated = [...data.procedureTimeline];
+                          updated[index].step = e.target.value;
+                          onChange({ ...data, procedureTimeline: updated });
+                          // Clear error when user starts typing
+                          if (errors.procedureTimeline?.[index]?.step) {
+                            const newErrors = { ...errors };
+                            if (newErrors.procedureTimeline?.[index]) {
+                              delete newErrors.procedureTimeline[index].step;
+                              if (Object.keys(newErrors.procedureTimeline[index]).length === 0) {
+                                delete newErrors.procedureTimeline[index];
+                              }
+                            }
+                            setErrors(newErrors);
+                          }
+                        }}
+                        className={`px-3 py-2 border rounded-lg ${
+                          errors.procedureTimeline?.[index]?.step ? "border-red-500" : "border-gray-300"
+                        }`}
+                      />
+                      {errors.procedureTimeline?.[index]?.step && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {errors.procedureTimeline[index].step}
+                        </p>
+                      )}
+                    </div>
 
-                  <input
-                    type="text"
-                    placeholder="Type Procedure"
-                    value={step.typeProcedure}
-                    onChange={(e) => {
-                      const updated = [...data.procedureTimeline];
-                      updated[index].typeProcedure = e.target.value;
-                      onChange({ ...data, procedureTimeline: updated });
-                    }}
-                    className="px-3 py-2 border rounded-lg"
-                  />
+                    <input
+                      type="text"
+                      placeholder="Type Procedure"
+                      value={step.typeProcedure}
+                      onChange={(e) => {
+                        const updated = [...data.procedureTimeline];
+                        updated[index].typeProcedure = e.target.value;
+                        onChange({ ...data, procedureTimeline: updated });
+                      }}
+                      className="px-3 py-2 border border-gray-300 rounded-lg"
+                    />
 
-                  <input
-                    type="text"
-                    placeholder="Duration"
-                    value={step.duration}
-                    onChange={(e) => {
-                      const updated = [...data.procedureTimeline];
-                      updated[index].duration = e.target.value;
-                      onChange({ ...data, procedureTimeline: updated });
-                    }}
-                    className="px-3 py-2 border rounded-lg"
-                  />
+                    <input
+                      type="text"
+                      placeholder="Duration"
+                      value={step.duration}
+                      onChange={(e) => {
+                        const updated = [...data.procedureTimeline];
+                        updated[index].duration = e.target.value;
+                        onChange({ ...data, procedureTimeline: updated });
+                      }}
+                      className="px-3 py-2 border border-gray-300 rounded-lg"
+                    />
 
-                  <input
-                    type="text"
-                    placeholder="Medication"
-                    value={step.medication}
-                    onChange={(e) => {
-                      const updated = [...data.procedureTimeline];
-                      updated[index].medication = e.target.value;
-                      onChange({ ...data, procedureTimeline: updated });
-                    }}
-                    className="px-3 py-2 border rounded-lg"
-                  />
+                    <input
+                      type="text"
+                      placeholder="Medication"
+                      value={step.medication}
+                      onChange={(e) => {
+                        const updated = [...data.procedureTimeline];
+                        updated[index].medication = e.target.value;
+                        onChange({ ...data, procedureTimeline: updated });
+                      }}
+                      className="px-3 py-2 border border-gray-300 rounded-lg"
+                    />
+                  </div>
                 </div>
               ))}
             </div>
@@ -838,6 +1015,7 @@ const App: React.FC = () => {
     duration: "",
     treatedBy: "",
     costingRange: "",
+    paragraph: "",
   });
   const [toast, setToast] = useState({
     show: false,
@@ -851,11 +1029,12 @@ const App: React.FC = () => {
       images: [],
       procedureTimeline: [
         { step: "", typeProcedure: "", duration: "", medication: "" },
-      ],
+      ],  
       benefits: [""],
       risks: [""],
       recoveryTimeline: [{ stage: "", mention: "", lightCare: "" }],
       faqs: [],
+      paragraph: "",
     });
 
   const handleNext = () => {
