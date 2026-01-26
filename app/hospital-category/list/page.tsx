@@ -8,7 +8,6 @@ import {
   Building2,
   FolderX,
   Plus,
-  Search,
 } from "lucide-react";
 
 import {
@@ -19,6 +18,7 @@ import {
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 import Toast from "@/components/Toast";
 import { useRouter } from "next/navigation";
+import Header from "@/components/Header";
 
 /* ---------------- Types ---------------- */
 type Category = {
@@ -29,8 +29,12 @@ type Category = {
 /* ---------------- Component ---------------- */
 export default function HospitalCategoryListPage() {
   const router = useRouter();
+
+  /* ---------------- States ---------------- */
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // ✅ Search from Header
   const [searchTerm, setSearchTerm] = useState("");
 
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -82,7 +86,9 @@ export default function HospitalCategoryListPage() {
 
       await deleteHospitalCategoryApi(deleteId);
 
-      setCategories((prev) => prev.filter((cat) => cat._id !== deleteId));
+      setCategories((prev) =>
+        prev.filter((cat) => cat._id !== deleteId),
+      );
 
       setDeleteId(null);
 
@@ -105,10 +111,12 @@ export default function HospitalCategoryListPage() {
   };
 
   /* ===============================
-     FILTER
+     FILTER (FROM HEADER SEARCH)
   =============================== */
   const filteredCategories = categories.filter((cat) =>
-    cat.hospitalCategory.toLowerCase().includes(searchTerm.toLowerCase()),
+    cat.hospitalCategory
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase()),
   );
 
   /* ===============================
@@ -116,6 +124,13 @@ export default function HospitalCategoryListPage() {
   =============================== */
   return (
     <div className="min-h-screen p-6 md:p-8">
+
+      {/* ✅ Header with Search */}
+      <Header
+        searchValue={searchTerm}
+        onSearchChange={(value) => setSearchTerm(value)}
+      />
+
       {/* Toast */}
       <Toast
         show={toast.show}
@@ -125,10 +140,14 @@ export default function HospitalCategoryListPage() {
       />
 
       <div className="max-w-5xl mx-auto">
+
         {/* Header */}
         <div className="mb-8">
+
           <div className="flex items-center justify-between mb-6">
+
             <div className="flex items-center gap-3">
+
               <div className="p-2 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-200">
                 <Building2 className="text-white" size={28} />
               </div>
@@ -138,6 +157,7 @@ export default function HospitalCategoryListPage() {
                   Hospital Categories
                 </h1>
               </div>
+
             </div>
 
             <button
@@ -147,50 +167,42 @@ export default function HospitalCategoryListPage() {
               <Plus size={20} />
               New
             </button>
+
           </div>
 
-          {/* Search + Stats */}
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <div className="relative flex-1 max-w-md">
-              <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                size={20}
-              />
-
-              <input
-                type="text"
-                placeholder="Search categories..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-          </div>
         </div>
 
         {/* Content Card */}
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+
           {/* Loading */}
           {loading && (
             <div className="flex flex-col items-center justify-center py-20">
+
               <Loader2
                 className="animate-spin text-indigo-600 mb-4"
                 size={40}
               />
 
-              <p className="text-gray-600 font-medium">Loading categories...</p>
+              <p className="text-gray-600 font-medium">
+                Loading categories...
+              </p>
+
             </div>
           )}
 
           {/* Empty */}
           {!loading && filteredCategories.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20 px-4">
+
               <div className="bg-gray-100 rounded-full p-6 mb-4">
                 <FolderX size={48} className="text-gray-400" />
               </div>
 
               <p className="text-xl font-semibold text-gray-800 mb-2">
-                {searchTerm ? "No results found" : "No categories yet"}
+                {searchTerm
+                  ? "No results found"
+                  : "No categories yet"}
               </p>
 
               <p className="text-sm text-gray-500 text-center max-w-sm">
@@ -198,28 +210,37 @@ export default function HospitalCategoryListPage() {
                   ? "Try adjusting your search terms"
                   : "Get started by adding your first hospital category"}
               </p>
+
             </div>
           )}
 
           {/* Grid */}
           {!loading && filteredCategories.length > 0 && (
             <div className="p-6">
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
                 {filteredCategories.map((category, index) => (
                   <div
                     key={category._id}
                     className="group relative bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-5 hover:shadow-lg hover:border-indigo-300 transition-all"
                   >
+
                     <div className="absolute top-4 right-4 bg-indigo-100 text-indigo-700 text-xs font-semibold px-2.5 py-1 rounded-full">
                       #{index + 1}
                     </div>
 
                     <div className="flex items-start gap-4">
+
                       <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg p-3 shadow-md">
-                        <Building2 className="text-white" size={24} />
+                        <Building2
+                          className="text-white"
+                          size={24}
+                        />
                       </div>
 
                       <div className="flex-1 pt-1">
+
                         <h3 className="font-semibold text-gray-900 text-lg mb-1 truncate pr-8">
                           {category.hospitalCategory}
                         </h3>
@@ -227,11 +248,14 @@ export default function HospitalCategoryListPage() {
                         <p className="text-sm text-gray-500">
                           Hospital Category
                         </p>
+
                       </div>
+
                     </div>
 
                     {/* Actions */}
                     <div className="mt-4 pt-4 border-t border-gray-200 flex justify-end opacity-0 group-hover:opacity-100 transition">
+
                       <button
                         onClick={() => setDeleteId(category._id)}
                         className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg"
@@ -239,9 +263,12 @@ export default function HospitalCategoryListPage() {
                         <Trash2 size={16} />
                         Delete
                       </button>
+
                     </div>
+
                   </div>
                 ))}
+
               </div>
             </div>
           )}
@@ -250,12 +277,18 @@ export default function HospitalCategoryListPage() {
         {/* Footer */}
         {!loading && filteredCategories.length > 0 && (
           <div className="mt-6 text-center">
+
             <p className="text-sm text-gray-500">
-              Showing {filteredCategories.length} of {categories.length}{" "}
-              {categories.length === 1 ? "category" : "categories"}
+              Showing {filteredCategories.length} of{" "}
+              {categories.length}{" "}
+              {categories.length === 1
+                ? "category"
+                : "categories"}
             </p>
+
           </div>
         )}
+
       </div>
 
       {/* Delete Modal */}
