@@ -13,3 +13,8 @@ export const createDoctorApi = async (payload: any) => {
 export const deleteDoctorApi = (id: string) => {
   return api.delete(`/doctor/${id}`);
 };
+
+export const getDoctorById = async (id: string) => {
+  const res = await api.get(`/doctor/${id}`);
+  return res.data;
+};

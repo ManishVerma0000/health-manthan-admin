@@ -15,3 +15,14 @@ export const getSurgeryListApi = async () => {
 export const deleteSurgeryApi = (id: string) => {
   return api.delete(`/surgery/${id}`);
 };
+
+
+export const getSurgeryById = async (id: string) => {
+  try {
+    const response = await api.get(`/surgery/${id}`);
+    return response.data;
+  } catch (error: any) {
+    console.error("Get Surgery Error:", error);
+    throw error;
+  }
+};

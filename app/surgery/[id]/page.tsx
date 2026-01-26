@@ -1,7 +1,10 @@
 "use client";
 
 import Header from "@/components/Header";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+
+import { getSurgeryById } from "@/services/surgery.service";
 
 interface TabType {
   id: string;
@@ -9,8 +12,24 @@ interface TabType {
   count?: number;
 }
 
+interface SurgeryData {
+  surgeryName: string;
+  diseaseNeme: string;
+  duration: string;
+  recoveryTime: string;
+  treatedBy: string;
+  icon: string;
+  images: string[];
+}
+
 const EyeSurgeryDetails: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>("overview");
+
+  const [activeTab, setActiveTab] = useState("overview");
+  const [surgery, setSurgery] = useState<SurgeryData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const params = useParams();
+  const id = params?.id as string;
 
   const tabs: TabType[] = [
     { id: "overview", label: "Overview" },
@@ -20,137 +39,222 @@ const EyeSurgeryDetails: React.FC = () => {
     { id: "stories", label: "Stories", count: 20 },
   ];
 
+  // ✅ API Call
+  useEffect(() => {
+    if (!id) return;
+
+    const fetchData = async () => {
+      try {
+        const res = await getSurgeryById(id);
+
+        setSurgery(res.data);
+
+      } catch (err) {
+        console.error("API Error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [id]);
+
+  // Loader
+  if (loading) {
+    return (
+      <div className="min-h-screen flex justify-center items-center">
+        Loading...
+      </div>
+    );
+  }
+
+  // No Data
+  if (!surgery) {
+    return (
+      <div className="min-h-screen flex justify-center items-center">
+        No Data Found
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
+
       {/* Header */}
-      <Header/>
+      <Header />
+
       <div className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
+
           <h1 className="text-xl font-semibold text-gray-900">
-            Eye Surgery Details
+            {surgery.surgeryName}
           </h1>
-          <button className="text-blue-600 hover:text-blue-700 font-medium text-sm">
+
+          <button className="text-blue-600 font-medium text-sm">
             Edit Hospital
           </button>
+
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Surgery Info */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Eye Laser Surgery
-              </h2>
-              <p className="text-sm text-gray-600 mb-6">Eye Surgery</p>
 
-              {/* Details Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+          {/* Left Column */}
+          <div className="lg:col-span-1">
+
+            <div className="bg-white rounded-lg shadow-sm p-6">
+
+              <h2 className="text-2xl font-bold mb-2">
+                {surgery.surgeryName}
+              </h2>
+
+              <p className="text-sm text-gray-600 mb-6">
+                {surgery.diseaseNeme}
+              </p>
+
+              {/* Details */}
               <div className="grid grid-cols-2 gap-4 mb-6">
+
                 <div className="border-l-4 border-blue-600 pl-3">
-                  <p className="text-xs text-gray-500 mb-1">Diseases Name</p>
-                  <p className="text-sm font-medium text-gray-900">
-                    Homopethiya or motibind
+                  <p className="text-xs text-gray-500 mb-1">
+                    Diseases Name
+                  </p>
+                  <p className="text-sm font-medium">
+                    {surgery.diseaseNeme}
                   </p>
                 </div>
+
                 <div className="border-l-4 border-blue-600 pl-3">
-                  <p className="text-xs text-gray-500 mb-1">Duration</p>
-                  <p className="text-sm font-medium text-gray-900">
-                    15 Min - 20 min
+                  <p className="text-xs text-gray-500 mb-1">
+                    Duration
+                  </p>
+                  <p className="text-sm font-medium">
+                    {surgery.duration}
                   </p>
                 </div>
+
               </div>
 
               <div className="grid grid-cols-2 gap-4 mb-6">
+
                 <div className="border-l-4 border-blue-600 pl-3">
-                  <p className="text-xs text-gray-500 mb-1">Recovery Time</p>
-                  <p className="text-sm font-medium text-gray-900">3-4 Week</p>
-                </div>
-                <div className="border-l-4 border-blue-600 pl-3">
-                  <p className="text-xs text-gray-500 mb-1">Treated By</p>
-                  <p className="text-sm font-medium text-gray-900">
-                    General Surgeon
+                  <p className="text-xs text-gray-500 mb-1">
+                    Recovery Time
+                  </p>
+                  <p className="text-sm font-medium">
+                    {surgery.recoveryTime}
                   </p>
                 </div>
+
+                <div className="border-l-4 border-blue-600 pl-3">
+                  <p className="text-xs text-gray-500 mb-1">
+                    Treated By
+                  </p>
+                  <p className="text-sm font-medium">
+                    {surgery.treatedBy}
+                  </p>
+                </div>
+
               </div>
 
               {/* Image */}
               <div className="rounded-lg overflow-hidden">
+
                 <img
-                  src="https://images.unsplash.com/photo-1551190822-a9333d879b1f?w=400&h=250&fit=crop"
-                  alt="Eye surgery procedure"
+                  src={surgery.images?.[0] || surgery.icon}
+                  alt={surgery.surgeryName}
                   className="w-full h-48 object-cover"
                 />
+
               </div>
+
             </div>
+
           </div>
 
-          {/* Right Column - Tabs Content */}
+          {/* Right Column */}
           <div className="lg:col-span-2">
+
             <div className="bg-white rounded-lg shadow-sm">
-              {/* Tabs Navigation */}
+
+              {/* Tabs */}
               <div className="border-b border-gray-200">
+
                 <nav className="flex -mb-px">
+
                   {tabs.map((tab) => (
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`
-                        px-6 py-4 text-sm font-medium border-b-2 transition-colors
+                      className={`px-6 py-4 text-sm font-medium border-b-2
                         ${
                           activeTab === tab.id
                             ? "border-blue-600 text-blue-600 bg-blue-50"
-                            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                        }
-                      `}
+                            : "border-transparent text-gray-500"
+                        }`}
                     >
                       {tab.label}
-                      {tab.count !== undefined && (
-                        <span className="ml-2 text-xs">({tab.count})</span>
+
+                      {tab.count && (
+                        <span className="ml-2 text-xs">
+                          ({tab.count})
+                        </span>
                       )}
+
                     </button>
                   ))}
+
                 </nav>
+
               </div>
 
-              {/* Tab Content */}
+              {/* Content */}
               <div className="p-8">
+
                 {activeTab === "overview" && (
+
                   <div className="text-gray-600">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+
+                    <h3 className="text-lg font-semibold mb-4">
                       Overview
                     </h3>
-                    <p className="mb-4">
-                      Eye laser surgery is a modern medical procedure used to
-                      correct vision problems and treat various eye conditions.
-                      This minimally invasive procedure uses advanced laser
-                      technology to reshape the cornea and improve vision.
+
+                    <p className="mb-2">
+                      Disease: {surgery.diseaseNeme}
                     </p>
-                    <p className="mb-4">
-                      The procedure is commonly used to treat conditions such as
-                      myopia (nearsightedness), hyperopia (farsightedness), and
-                      astigmatism. It's performed by experienced
-                      ophthalmologists and typically takes 15-20 minutes per
-                      eye.
+
+                    <p className="mb-2">
+                      Duration: {surgery.duration}
                     </p>
+
                     <p>
-                      Recovery time is generally 3-4 weeks, during which
-                      patients should follow their doctor's instructions
-                      carefully to ensure optimal healing and results.
+                      Recovery: {surgery.recoveryTime}
                     </p>
+
                   </div>
+
                 )}
+
                 {activeTab !== "overview" && (
+
                   <div className="text-center text-gray-500 py-12">
-                    Content for {tabs.find((t) => t.id === activeTab)?.label}{" "}
-                    tab
+                    Content for {activeTab} tab
                   </div>
+
                 )}
+
               </div>
+
             </div>
+
           </div>
+
         </div>
+
       </div>
+
     </div>
   );
 };
