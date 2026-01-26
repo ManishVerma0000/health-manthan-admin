@@ -18,3 +18,9 @@ export const getDoctorById = async (id: string) => {
   const res = await api.get(`/doctor/${id}`);
   return res.data;
 };
+
+
+export const getDoctorsByHospital = async (hospitalId: string) => {
+  const res = await api.get(`/doctor/hospital/${hospitalId}`);
+  return res.data;
+};
