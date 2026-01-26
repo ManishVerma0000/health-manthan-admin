@@ -250,6 +250,16 @@ export default function HospitalInformationStep({
             )}
           </Section>
 
+          {/* Hospital Details */}
+          <Section title="Hospital Details">
+            <textarea
+              className="w-full border px-3 py-2 rounded-md min-h-[100px]"
+              placeholder="Enter hospital details..."
+              value={data.hospitaldetails || ""}
+              onChange={(e) => onChange({ hospitaldetails: e.target.value })}
+            />
+          </Section>
+
           {/* Submit */}
           <button
             disabled={uploading}

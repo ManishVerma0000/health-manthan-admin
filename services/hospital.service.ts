@@ -16,12 +16,14 @@ export interface CreateHospitalPayload {
   location: string;
 
   iconUrl: string;
+  firstStepImageUrls: string[];
   imageUrls: string[];
   timings: any[];
 
   treatmentList: string[];
   cashlessList: string[];
   panelList: string[];
+  hospitaldetails: string;
 }
 
 export const createHospitalApi = async (payload: any) => {

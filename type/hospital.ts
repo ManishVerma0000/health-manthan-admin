@@ -13,10 +13,15 @@ export type HospitalFormData = {
     days: string;
     time: string;
   }[];
+  iconUrl?: string;
+
+  // STEP 1 - First component images
+  firstStepImageUrls: string[];
 
   // STEP 2 (IDs ONLY)
   treatmentList: string[];
   cashlessList: string[];
   panelList: string[];
   imageUrls: string[];
+  hospitaldetails: string;
 };

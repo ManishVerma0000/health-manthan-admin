@@ -55,9 +55,7 @@ const HospitalProfile: React.FC = () => {
     const fetchHospital = async () => {
       try {
         const res = await getHospitalById(id);
-
         setHospital(res.data);
-
       } catch (err) {
         console.error("Hospital API Error:", err);
       } finally {

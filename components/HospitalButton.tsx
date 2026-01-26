@@ -118,14 +118,34 @@ export default function HospitalDetailsStep({
   };
 
   const uploadMultipleImages = async (files: File[]) => {
-    for (const file of files) {
-      const url = await uploadImage(file);
+    try {
+      setUploading(true);
+      
+      // Upload all files first and collect URLs
+      const uploadPromises = files.map(async (file) => {
+        try {
+          const res = await uploadImageApi(file);
+          return res?.success ? res.file.url : null;
+        } catch (error) {
+          console.error("Upload failed for file", error);
+          return null;
+        }
+      });
 
-      if (url) {
-        onChange({
-          imageUrls: [...(data.imageUrls || []), url].slice(0, 10),
-        });
+      const uploadedUrls = await Promise.all(uploadPromises);
+      const validUrls = uploadedUrls.filter((url): url is string => Boolean(url));
+
+      // Update state once with all new URLs
+      if (validUrls.length > 0) {
+        const currentUrls = data.firstStepImageUrls || [];
+        const newUrls = [...currentUrls, ...validUrls].slice(0, 10);
+        onChange({ firstStepImageUrls: newUrls });
       }
+    } catch (error) {
+      console.error("Image upload failed", error);
+      alert("Image upload failed");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -270,6 +290,16 @@ export default function HospitalDetailsStep({
               />
             </label>
 
+            {data?.iconUrl && (
+              <div className="mt-2">
+                <img
+                  src={data.iconUrl}
+                  alt="Icon preview"
+                  className="w-20 h-20 object-cover rounded-md border"
+                />
+              </div>
+            )}
+
             {errors.iconUrl && (
               <p className="text-red-500 text-xs mt-1">
                 {errors.iconUrl}
@@ -280,14 +310,15 @@ export default function HospitalDetailsStep({
 
         {/* Images */}
         <div>
+          <label className="block text-sm mb-2">Images</label>
           <div
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleDrop}
-            className="border-2 border-dashed h-64 rounded-lg flex flex-col items-center justify-center text-center px-4"
+            className="border-2 border-dashed rounded-lg flex flex-col items-center justify-center text-center px-4 py-6 min-h-[200px]"
           >
             <ImageIcon size={40} className="text-gray-500 mb-3" />
 
-            <p>Drag Images here or</p>
+            <p className="text-sm">Drag Images here or</p>
 
             <label className="text-blue-600 cursor-pointer underline">
               Browse Images
@@ -302,6 +333,34 @@ export default function HospitalDetailsStep({
 
             <p className="text-xs text-gray-500 mt-2">Max 10 images</p>
           </div>
+
+          {/* Image Previews */}
+          {data?.firstStepImageUrls && data.firstStepImageUrls.length > 0 && (
+            <div className="mt-4">
+              <div className="grid grid-cols-3 gap-2">
+                {data.firstStepImageUrls.map((url: string, index: number) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={url}
+                      alt={`Preview ${index + 1}`}
+                      className="w-full h-24 object-cover rounded-md border"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const updated = [...(data.firstStepImageUrls || [])];
+                        updated.splice(index, 1);
+                        onChange({ firstStepImageUrls: updated });
+                      }}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -361,23 +420,70 @@ export default function HospitalDetailsStep({
           </button>
         </div>
 
-        {timings.map((t, i) => (
-          <div key={i} className="grid grid-cols-4 gap-6 mb-3">
-            <input
-              className="border px-3 py-2 rounded-md"
-              placeholder="Mon-Fri"
-              value={t.days}
-              onChange={(e) => updateTiming(i, "days", e.target.value)}
-            />
+        {timings.map((t, i) => {
+          // Parse time if it's in "5AM to 5PM" format
+          const timeParts = t.time ? t.time.split(" to ") : ["", ""];
+          const startTime = timeParts[0] || "";
+          const endTime = timeParts[1] || "";
 
-            <input
-              className="col-span-2 border px-3 py-2 rounded-md"
-              placeholder="9:00 AM - 5:00 PM"
-              value={t.time}
-              onChange={(e) => updateTiming(i, "time", e.target.value)}
-            />
-          </div>
-        ))}
+          const handleTimeChange = (start: string, end: string) => {
+            const formattedTime = start && end ? `${start} to ${end}` : start || end;
+            updateTiming(i, "time", formattedTime);
+          };
+
+          return (
+            <div key={i} className="grid grid-cols-5 gap-4 mb-3">
+              {/* Day Select */}
+              <select
+                className="border px-3 py-2 rounded-md"
+                value={t.days}
+                onChange={(e) => updateTiming(i, "days", e.target.value)}
+              >
+                <option value="">Select Day</option>
+                <option value="Sunday">Sunday</option>
+                <option value="Monday">Monday</option>
+                <option value="Tuesday">Tuesday</option>
+                <option value="Wednesday">Wednesday</option>
+                <option value="Thursday">Thursday</option>
+                <option value="Friday">Friday</option>
+                <option value="Saturday">Saturday</option>
+              </select>
+
+              {/* Start Time */}
+              <input
+                className="border px-3 py-2 rounded-md"
+                placeholder="5AM"
+                value={startTime}
+                onChange={(e) => handleTimeChange(e.target.value, endTime)}
+              />
+
+              <span className="flex items-center justify-center text-gray-500">to</span>
+
+              {/* End Time */}
+              <input
+                className="border px-3 py-2 rounded-md"
+                placeholder="5PM"
+                value={endTime}
+                onChange={(e) => handleTimeChange(startTime, e.target.value)}
+              />
+
+              {/* Remove Button */}
+              {timings.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const updated = [...timings];
+                    updated.splice(i, 1);
+                    onChange({ timings: updated });
+                  }}
+                  className="text-red-600 text-sm font-medium"
+                >
+                  Remove
+                </button>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* Next */}
