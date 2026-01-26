@@ -259,9 +259,9 @@ export default function SurgeryCategoryPage() {
                         {/* Actions */}
                         <td className="px-6 py-4">
                           <div className="flex gap-2">
-                            <button className="p-2 text-blue-600 hover:bg-blue-50 rounded">
+                            {/* <button className="p-2 text-blue-600 hover:bg-blue-50 rounded">
                               <Pencil size={18} />
-                            </button>
+                            </button> */}
 
                             <button
                               onClick={(e) => {

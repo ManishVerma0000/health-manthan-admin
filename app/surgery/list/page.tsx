@@ -344,7 +344,7 @@ export default function SurgeryPage() {
                               <div className="flex gap-2">
 
                                 {/* Edit */}
-                                <button
+                                {/* <button
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     router.push(
@@ -357,7 +357,7 @@ export default function SurgeryPage() {
                                     size={18}
                                   />
                                 </button>
-
+ */}
                                 {/* Delete */}
                                 <button
                                   onClick={(e) => {

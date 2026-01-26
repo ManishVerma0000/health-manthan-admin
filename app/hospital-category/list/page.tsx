@@ -18,6 +18,7 @@ import {
 
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 import Toast from "@/components/Toast";
+import { useRouter } from "next/navigation";
 
 /* ---------------- Types ---------------- */
 type Category = {
@@ -27,6 +28,7 @@ type Category = {
 
 /* ---------------- Component ---------------- */
 export default function HospitalCategoryListPage() {
+  const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -132,19 +134,18 @@ export default function HospitalCategoryListPage() {
               </div>
 
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">
+                <h1 className="text-xl font-bold text-gray-900">
                   Hospital Categories
                 </h1>
-
-                <p className="text-sm text-gray-600">
-                  Manage and organize hospital category data
-                </p>
               </div>
             </div>
 
-            <button className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium shadow-lg shadow-indigo-200 transition-all hover:shadow-xl hover:scale-105">
+            <button
+              onClick={() => router.push("/insurance-company/add")}
+              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium shadow-lg shadow-indigo-200 transition-all hover:shadow-xl hover:scale-105"
+            >
               <Plus size={20} />
-              Add Category
+              New
             </button>
           </div>
 
@@ -163,14 +164,6 @@ export default function HospitalCategoryListPage() {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
-            </div>
-
-            <div className="bg-white rounded-xl px-5 py-2.5 border border-gray-200 shadow-sm">
-              <span className="text-sm text-gray-600">Total Categories</span>
-
-              <p className="text-2xl font-bold text-indigo-600">
-                {categories.length}
-              </p>
             </div>
           </div>
         </div>
