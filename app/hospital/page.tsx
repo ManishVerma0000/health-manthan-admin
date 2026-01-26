@@ -4,6 +4,7 @@ import { useState } from "react";
 import HospitalDetailsStep from "@/components/HospitalButton";
 import HospitalInformationStep from "@/components/HospitalInformation";
 import { createHospitalApi } from "@/services/hospital.service";
+import Header from "@/components/Header";
 // import HospitalDetailsStep from "./add/page";
 // import HospitalInformationStep from "./add/information/page";
 
@@ -115,6 +116,7 @@ export default function HospitalCreatePage() {
 
   return (
     <>
+    <Header/>
       {step === 1 && (
         <HospitalDetailsStep
           data={formData}

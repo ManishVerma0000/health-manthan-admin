@@ -184,7 +184,7 @@ export default function HospitalListPage() {
 
             <button
               onClick={() =>
-                router.push("/hospital/add")
+                router.push("/hospital")
               }
               className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium"
             >

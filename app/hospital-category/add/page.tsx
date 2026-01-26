@@ -1,5 +1,6 @@
 "use client";
 
+import Header from "@/components/Header";
 import { createHospitalCategoryApi } from "@/services/hospital.service";
 import { useState } from "react";
 
@@ -28,8 +29,10 @@ export default function AddHospitalCategoryPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
+    <div className="min-h-screen  bg-gray-100">
+      <Header />
+      <div className="flex items-center justify-center bg-gray-100 mt-20">
+         <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
         <h2 className="text-lg font-semibold mb-4 text-center">
           Add Hospital Category
         </h2>
@@ -50,6 +53,8 @@ export default function AddHospitalCategoryPage() {
           {loading ? "Submitting..." : "Submit"}
         </button>
       </div>
+      </div>
+     
     </div>
   );
 }

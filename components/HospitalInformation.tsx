@@ -7,10 +7,6 @@ import { fetchInsuranceCompaniesApi } from "@/services/insuranceCompany.service"
 import { getCashlessInsuranceListApi } from "@/services/cashlessInsurance.service";
 import { getGovernmentPanelListApi } from "@/services/governmentPanel.service";
 import { uploadImageApi } from "@/services/category.services";
-// import { HospitalFormData } from "../../page";
-
-
-const API_BASE = "http://localhost:3000";
 
 /* ---------- TYPES ---------- */
 
@@ -53,26 +49,54 @@ export default function HospitalInformationStep({
   >([]);
   const [uploading, setUploading] = useState<boolean>(false);
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
   /* ---------- FETCH DROPDOWNS ---------- */
-useEffect(() => {
-  const fetchMasterData = async () => {
-    try {
-      const [i, c, g] = await Promise.all([
-        fetchInsuranceCompaniesApi(),
-        getCashlessInsuranceListApi(),
-        getGovernmentPanelListApi(),
-      ]);
+  useEffect(() => {
+    const fetchMasterData = async () => {
+      try {
+        const [i, c, g] = await Promise.all([
+          fetchInsuranceCompaniesApi(),
+          getCashlessInsuranceListApi(),
+          getGovernmentPanelListApi(),
+        ]);
 
-      setInsuranceCompanies(i.data ?? []);
-      setCashlessCompanies(c.data ?? []);
-      setGovernmentPanels(g.data ?? []);
-    } catch (error) {
-      console.error("Failed to fetch master data", error);
+        setInsuranceCompanies(i.data ?? []);
+        setCashlessCompanies(c.data ?? []);
+        setGovernmentPanels(g.data ?? []);
+      } catch (error) {
+        console.error("Failed to fetch master data", error);
+      }
+    };
+
+    fetchMasterData();
+  }, []);
+
+  /* ---------- VALIDATION ---------- */
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!data.treatmentList.length) {
+      newErrors.treatmentList = "Select at least one insurance company";
     }
-  };
 
-  fetchMasterData();
-}, []);
+    if (!data.cashlessList.length) {
+      newErrors.cashlessList = "Select at least one cashless company";
+    }
+
+    if (!data.panelList.length) {
+      newErrors.panelList = "Select at least one government panel";
+    }
+
+    if (!data.imageUrls.length) {
+      newErrors.imageUrls = "Upload at least one hospital image";
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
 
   /* ---------- HELPERS ---------- */
 
@@ -81,7 +105,15 @@ useEffect(() => {
     id: string
   ) => {
     if (!id || data[key].includes(id)) return;
+
     onChange({ [key]: [...data[key], id] });
+
+    // Remove error when fixed
+    setErrors((prev) => {
+      const copy = { ...prev };
+      delete copy[key];
+      return copy;
+    });
   };
 
   const removeItem = (
@@ -95,31 +127,46 @@ useEffect(() => {
 
   /* ---------- IMAGE UPLOAD ---------- */
 
-  
+  const uploadImages = async (files: File[]) => {
+    try {
+      setUploading(true);
 
-const uploadImages = async (files: File[]) => {
-  try {
-    setUploading(true);
+      const uploadedUrls = await Promise.all(
+        files.map(async (file) => {
+          const res = await uploadImageApi(file);
+          return res?.success ? res.file.url : null;
+        })
+      );
 
-    const uploadedUrls = await Promise.all(
-      files.map(async (file) => {
-        const res = await uploadImageApi(file);
-        return res?.success ? res.file.url : null;
-      })
-    );
-    const validUrls = uploadedUrls.filter(
-      (url): url is string => Boolean(url)
-    );
-    onChange({
-      imageUrls: [...data.imageUrls, ...validUrls].slice(0, 10),
-    });
-  } catch (error) {
-    console.error("Image upload failed", error);
-    alert("Image upload failed");
-  } finally {
-    setUploading(false);
-  }
-};
+      const validUrls = uploadedUrls.filter(
+        (url): url is string => Boolean(url)
+      );
+
+      onChange({
+        imageUrls: [...data.imageUrls, ...validUrls].slice(0, 10),
+      });
+
+      // Clear image error
+      setErrors((prev) => {
+        const copy = { ...prev };
+        delete copy.imageUrls;
+        return copy;
+      });
+    } catch (error) {
+      console.error("Image upload failed", error);
+      alert("Image upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  /* ---------- SUBMIT ---------- */
+
+  const handleSubmit = () => {
+    if (validate()) {
+      onSubmit();
+    }
+  };
 
   /* ---------- UI ---------- */
 
@@ -128,6 +175,7 @@ const uploadImages = async (files: File[]) => {
       <div className="grid grid-cols-3 gap-10">
         {/* LEFT */}
         <div className="col-span-2 space-y-8">
+
           {/* Treatment */}
           <Section title="Treatment Providing">
             <Select
@@ -136,6 +184,7 @@ const uploadImages = async (files: File[]) => {
               getLabel={(i) => i.insuranceCompany}
               onSelect={(id) => addItem("treatmentList", id)}
             />
+
             <Chips
               ids={data.treatmentList}
               getName={(id) =>
@@ -144,6 +193,12 @@ const uploadImages = async (files: File[]) => {
               }
               onRemove={(i) => removeItem("treatmentList", i)}
             />
+
+            {errors.treatmentList && (
+              <p className="text-red-500 text-xs mt-1">
+                {errors.treatmentList}
+              </p>
+            )}
           </Section>
 
           {/* Cashless */}
@@ -154,6 +209,7 @@ const uploadImages = async (files: File[]) => {
               getLabel={(i) => i.cashlessInsuranceCompany}
               onSelect={(id) => addItem("cashlessList", id)}
             />
+
             <Chips
               ids={data.cashlessList}
               getName={(id) =>
@@ -162,6 +218,12 @@ const uploadImages = async (files: File[]) => {
               }
               onRemove={(i) => removeItem("cashlessList", i)}
             />
+
+            {errors.cashlessList && (
+              <p className="text-red-500 text-xs mt-1">
+                {errors.cashlessList}
+              </p>
+            )}
           </Section>
 
           {/* Panel */}
@@ -172,6 +234,7 @@ const uploadImages = async (files: File[]) => {
               getLabel={(i) => i.panelName}
               onSelect={(id) => addItem("panelList", id)}
             />
+
             <Chips
               ids={data.panelList}
               getName={(id) =>
@@ -179,11 +242,19 @@ const uploadImages = async (files: File[]) => {
               }
               onRemove={(i) => removeItem("panelList", i)}
             />
+
+            {errors.panelList && (
+              <p className="text-red-500 text-xs mt-1">
+                {errors.panelList}
+              </p>
+            )}
           </Section>
 
+          {/* Submit */}
           <button
-            onClick={onSubmit}
-            className="bg-blue-600 text-white px-8 py-2 rounded"
+            disabled={uploading}
+            onClick={handleSubmit}
+            className="bg-blue-600 text-white px-8 py-2 rounded disabled:opacity-50"
           >
             Submit Hospital
           </button>
@@ -202,9 +273,12 @@ const uploadImages = async (files: File[]) => {
             className="border-2 border-dashed rounded-lg p-6 min-h-[200px] flex flex-col items-center justify-center"
           >
             <ImageIcon className="w-10 h-10 text-gray-500 mb-2" />
+
             <p className="text-sm">Drag images here or</p>
+
             <label className="text-blue-600 underline cursor-pointer">
               Browse Images
+
               <input
                 type="file"
                 multiple
@@ -215,12 +289,19 @@ const uploadImages = async (files: File[]) => {
                 }
               />
             </label>
+
             <p className="text-xs text-gray-500 mt-2">Max 10 images</p>
           </div>
 
+          {errors.imageUrls && (
+            <p className="text-red-500 text-xs mt-2">
+              {errors.imageUrls}
+            </p>
+          )}
+
           {data.imageUrls.length > 0 && (
             <div className="mt-3 space-y-1">
-              {data.imageUrls.map((url:any, i:number) => (
+              {data.imageUrls.map((url: any, i: number) => (
                 <p key={i} className="text-xs text-green-600 truncate">
                   {url}
                 </p>
@@ -264,18 +345,21 @@ function Select<T extends { _id: string }>({
   return (
     <div className="mb-3">
       <label className="text-sm">{label}</label>
+
       <div className="relative">
         <select
           className="border px-3 py-2 w-full"
           onChange={(e) => onSelect(e.target.value)}
         >
           <option value="">Select</option>
+
           {options.map((o) => (
             <option key={o._id} value={o._id}>
               {getLabel(o)}
             </option>
           ))}
         </select>
+
         <ChevronDown className="absolute right-2 top-3 h-4 w-4" />
       </div>
     </div>
@@ -299,7 +383,11 @@ function Chips({
           className="bg-gray-200 px-3 py-1 rounded-full text-sm"
         >
           {getName(id)}
-          <button className="ml-2" onClick={() => onRemove(i)}>
+
+          <button
+            className="ml-2"
+            onClick={() => onRemove(i)}
+          >
             ✕
           </button>
         </span>
@@ -307,3 +395,4 @@ function Chips({
     </div>
   );
 }
+  

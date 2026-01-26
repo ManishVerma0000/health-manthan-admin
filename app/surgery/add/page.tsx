@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { ChevronLeft, Plus, X, ImageIcon } from "lucide-react";
+import { ChevronLeft, Plus, X, ImageIcon, Upload } from "lucide-react";
 import { uploadImageApi } from "@/services/upload.services";
 import { createSurgeryApi } from "@/services/surgery.service";
 import Toast from "@/components/Toast";
@@ -17,6 +17,7 @@ interface SurgeryDetails {
   diseaseNeme: string;
   recoveryTime: string;
   icon: string | null;
+  image: string | null;
   surgeryCategory: string;
   duration: string;
   treatedBy: string;
@@ -148,6 +149,7 @@ const SurgeryDetailsStep: React.FC<{
   });
 
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [iconFile, setIconFile] = useState<File | null>(null);
 
   const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
@@ -161,9 +163,9 @@ const SurgeryDetailsStep: React.FC<{
       if (!imageUrl) return;
 
       setImageFile(file);
-      onChange({ ...data, icon: imageUrl });
+      onChange({ ...data, image: imageUrl });
     } catch (err) {
-      console.error("Icon upload failed", err);
+      console.error("Image upload failed", err);
     }
   };
 
@@ -177,7 +179,26 @@ const SurgeryDetailsStep: React.FC<{
       if (!imageUrl) return;
 
       setImageFile(e.target.files[0]);
+      onChange({ ...data, image: imageUrl });
+    } catch (err) {
+      console.error("Image upload failed", err);
+    }
+  };
+
+  const handleIconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.[0]) return;
+
+    try {
+      const res = await uploadImageApi(e.target.files[0]);
+      const imageUrl = extractImageUrl(res);
+
+      if (!imageUrl) return;
+
+      setIconFile(e.target.files[0]);
       onChange({ ...data, icon: imageUrl });
+      if (errors.icon) {
+        setErrors({ ...errors, icon: "" });
+      }
     } catch (err) {
       console.error("Icon upload failed", err);
     }
@@ -380,35 +401,107 @@ const SurgeryDetailsStep: React.FC<{
             </div>
 
             {/* Right Column - Image Upload */}
-            <div className="col-span-1">
-              <div
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={handleDrop}
-                className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center"
-              >
-                <ImageIcon size={50} className="text-gray-400 mb-3" />
-                <p>Drag Image or</p>
+            <div className="col-span-1 space-y-4">
+              {/* Main Image Upload */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Surgery Image
+                </label>
+                <div
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={handleDrop}
+                  className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center"
+                >
+                  <ImageIcon size={50} className="text-gray-400 mb-3" />
+                  <p>Drag Image or</p>
 
-                <label className="text-orange-600 underline cursor-pointer">
-                  Browse
+                  <label className="text-orange-600 underline cursor-pointer">
+                    Browse
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleBrowse}
+                    />
+                  </label>
+                </div>
+
+                {imageFile && (
+                  <div className="mt-2">
+                    <p className="text-sm text-gray-600 mb-1">{imageFile.name}</p>
+                    {data.image && (
+                      <img
+                        src={data.image}
+                        alt="Surgery Image"
+                        className="w-full h-32 object-cover rounded-lg border border-gray-300 mt-2"
+                      />
+                    )}
+                  </div>
+                )}
+
+                {data.image && !imageFile && (
+                  <div className="mt-2">
+                    <img
+                      src={data.image}
+                      alt="Surgery Image"
+                      className="w-full h-32 object-cover rounded-lg border border-gray-300"
+                    />
+                    <p className="text-green-600 text-xs mt-1 break-all">
+                      Uploaded: {data.image}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Upload Icon Button */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Icon (1:1)
+                </label>
+                <label
+                  className={`flex items-center gap-2 px-4 py-2 border rounded-md cursor-pointer hover:bg-gray-50 ${
+                    errors.icon ? "border-red-500" : "border-gray-300"
+                  }`}
+                >
+                  <Upload size={16} />
+                  Upload Icon
                   <input
                     type="file"
                     className="hidden"
                     accept="image/*"
-                    onChange={handleBrowse}
+                    onChange={handleIconUpload}
                   />
                 </label>
+                {iconFile && (
+                  <div className="mt-2">
+                    <p className="text-sm text-gray-500 mb-1">{iconFile.name}</p>
+                    {data.icon && (
+                      <img
+                        src={data.icon}
+                        alt="Surgery Icon"
+                        className="w-24 h-24 object-cover rounded-lg border border-gray-300 mt-2"
+                      />
+                    )}
+                  </div>
+                )}
+
+                {data.icon && !iconFile && (
+                  <div className="mt-2">
+                    <img
+                      src={data.icon}
+                      alt="Surgery Icon"
+                      className="w-24 h-24 object-cover rounded-lg border border-gray-300"
+                    />
+                    <p className="text-green-600 text-xs mt-1 break-all">
+                      Uploaded: {data.icon}
+                    </p>
+                  </div>
+                )}
+
+                {errors.icon && (
+                  <p className="text-red-500 text-sm mt-1">{errors.icon}</p>
+                )}
               </div>
-
-              {imageFile && (
-                <p className="text-sm mt-2 text-gray-600">{imageFile.name}</p>
-              )}
-
-              {data.icon && (
-                <p className="text-green-600 text-xs mt-2 break-all">
-                  Uploaded URL: {data.icon}
-                </p>
-              )}
             </div>
           </div>
         </div>
@@ -618,6 +711,46 @@ const SurgeryInformationStep: React.FC<{
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-4">
+              {surgeryDetails.image && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Surgery Image
+                  </label>
+                  <div className="flex items-center gap-4">
+                    <img
+                      src={surgeryDetails.image}
+                      alt="Surgery Image"
+                      className="w-32 h-32 object-cover rounded-lg border-2 border-gray-300 shadow-sm"
+                    />
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-500 break-all">
+                        {surgeryDetails.image}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {surgeryDetails.icon && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Surgery Icon
+                  </label>
+                  <div className="flex items-center gap-4">
+                    <img
+                      src={surgeryDetails.icon}
+                      alt="Surgery Icon"
+                      className="w-24 h-24 object-cover rounded-lg border-2 border-gray-300 shadow-sm"
+                    />
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-500 break-all">
+                        {surgeryDetails.icon}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -972,7 +1105,7 @@ const SurgeryInformationStep: React.FC<{
 
             {/* FAQ Inputs */}
             {data.faqs.map((faq, index) => (
-              <div key={index} className="grid grid-cols-2 gap-4 mb-4">
+              <div key={index} className="grid grid-cols-2 gap-4 mb-4 relative">
                 <input
                   placeholder="Question"
                   value={faq.question}
@@ -984,16 +1117,31 @@ const SurgeryInformationStep: React.FC<{
                   className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                 />
 
-                <input
-                  placeholder="Answer"
-                  value={faq.answer}
-                  onChange={(e) => {
-                    const updated = [...data.faqs];
-                    updated[index].answer = e.target.value;
-                    onChange({ ...data, faqs: updated });
-                  }}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                />
+                <div className="relative">
+                  <input
+                    placeholder="Answer"
+                    value={faq.answer}
+                    onChange={(e) => {
+                      const updated = [...data.faqs];
+                      updated[index].answer = e.target.value;
+                      onChange({ ...data, faqs: updated });
+                    }}
+                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 w-full pr-10"
+                  />
+                  {data.faqs.length > 1 && (
+                    <button
+                      onClick={() =>
+                        onChange({
+                          ...data,
+                          faqs: data.faqs.filter((_, i) => i !== index),
+                        })
+                      }
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-red-500 hover:text-red-700"
+                    >
+                      <X size={18} />
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -1011,6 +1159,7 @@ const App: React.FC = () => {
     diseaseNeme: "",
     recoveryTime: "",
     icon: null,
+    image: null,
     surgeryCategory: "",
     duration: "",
     treatedBy: "",
@@ -1033,7 +1182,7 @@ const App: React.FC = () => {
       benefits: [""],
       risks: [""],
       recoveryTimeline: [{ stage: "", mention: "", lightCare: "" }],
-      faqs: [],
+      faqs: [{ question: "", answer: "" }],
       paragraph: "",
     });
 

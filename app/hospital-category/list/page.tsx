@@ -141,7 +141,7 @@ export default function HospitalCategoryListPage() {
             </div>
 
             <button
-              onClick={() => router.push("/insurance-company/add")}
+              onClick={() => router.push("/hospital-category/add")}
               className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium shadow-lg shadow-indigo-200 transition-all hover:shadow-xl hover:scale-105"
             >
               <Plus size={20} />

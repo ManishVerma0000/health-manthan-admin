@@ -7,8 +7,6 @@ import { getCashlessInsuranceListApi } from "@/services/cashlessInsurance.servic
 import { getGovernmentPanelListApi } from "@/services/governmentPanel.service";
 import { uploadImageApi } from "@/services/upload.services";
 
-const API_BASE = "http://localhost:3000";
-
 /* ---------- TYPES ---------- */
 
 type InsuranceCompany = {
@@ -49,6 +47,12 @@ export default function HospitalInformationStep({
     []
   );
   const [uploading, setUploading] = useState<boolean>(false);
+  const [errors, setErrors] = useState<{
+    treatmentList?: string;
+    cashlessList?: string;
+    panelList?: string;
+    imageUrls?: string;
+  }>({});
 
   /* ---------- FETCH DROPDOWNS ---------- */
 
@@ -72,6 +76,36 @@ export default function HospitalInformationStep({
     fetchLookups();
   }, []);
 
+  /* ---------- VALIDATION ---------- */
+
+  const validate = (): boolean => {
+    const newErrors: {
+      treatmentList?: string;
+      cashlessList?: string;
+      panelList?: string;
+      imageUrls?: string;
+    } = {};
+
+    if (!data.treatmentList || data.treatmentList.length === 0) {
+      newErrors.treatmentList = "At least one Insurance Company is required";
+    }
+
+    if (!data.cashlessList || data.cashlessList.length === 0) {
+      newErrors.cashlessList = "At least one Cashless Insurance Company is required";
+    }
+
+    if (!data.panelList || data.panelList.length === 0) {
+      newErrors.panelList = "At least one Government Panel is required";
+    }
+
+    if (!data.imageUrls || data.imageUrls.length === 0) {
+      newErrors.imageUrls = "At least one Hospital Image is required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   /* ---------- HELPERS ---------- */
 
   const addItem = (
@@ -80,6 +114,10 @@ export default function HospitalInformationStep({
   ) => {
     if (!id || data[key].includes(id)) return;
     onChange({ [key]: [...data[key], id] });
+    // Clear error when item is added
+    if (errors[key]) {
+      setErrors({ ...errors, [key]: undefined });
+    }
   };
 
   const removeItem = (
@@ -117,6 +155,17 @@ export default function HospitalInformationStep({
     onChange({
       imageUrls: [...data.imageUrls, ...urls].slice(0, 10),
     });
+    
+    // Clear error when images are uploaded
+    if (errors.imageUrls) {
+      setErrors({ ...errors, imageUrls: undefined });
+    }
+  };
+
+  const handleSubmit = () => {
+    if (validate()) {
+      onSubmit();
+    }
   };
 
   /* ---------- UI ---------- */
@@ -127,12 +176,13 @@ export default function HospitalInformationStep({
         {/* LEFT */}
         <div className="col-span-2 space-y-8">
           {/* Treatment */}
-          <Section title="Treatment Providing">
+          <Section title="Treatment Providing" error={errors.treatmentList}>
             <Select
               label="Insurance Company"
               options={insuranceCompanies}
               getLabel={(i) => i?.insuranceCompany}
               onSelect={(id) => addItem("treatmentList", id)}
+              error={errors.treatmentList}
             />
             <Chips
               ids={data?.treatmentList}
@@ -145,12 +195,13 @@ export default function HospitalInformationStep({
           </Section>
 
           {/* Cashless */}
-          <Section title="Cashless Insurance Companies">
+          <Section title="Cashless Insurance Companies" error={errors.cashlessList}>
             <Select
               label="Cashless Insurance"
               options={cashlessCompanies}
               getLabel={(i) => i?.cashlessInsuranceCompany}
               onSelect={(id) => addItem("cashlessList", id)}
+              error={errors.cashlessList}
             />
             <Chips
               ids={data?.cashlessList}
@@ -163,12 +214,13 @@ export default function HospitalInformationStep({
           </Section>
 
           {/* Panel */}
-          <Section title="Government Panel">
+          <Section title="Government Panel" error={errors.panelList}>
             <Select
               label="Panel"
               options={governmentPanels}
               getLabel={(i) => i?.panelName}
               onSelect={(id) => addItem("panelList", id)}
+              error={errors.panelList}
             />
             <Chips
               ids={data?.panelList}
@@ -180,8 +232,8 @@ export default function HospitalInformationStep({
           </Section>
 
           <button
-            onClick={onSubmit}
-            className="bg-blue-600 text-white px-8 py-2 rounded"
+            onClick={handleSubmit}
+            className="bg-blue-600 text-white px-8 py-2 rounded hover:bg-blue-700"
           >
             Submit Hospital
           </button>
@@ -197,7 +249,9 @@ export default function HospitalInformationStep({
               e.preventDefault();
               uploadImages(Array.from(e.dataTransfer.files));
             }}
-            className="border-2 border-dashed rounded-lg p-6 min-h-[200px] flex flex-col items-center justify-center"
+            className={`border-2 border-dashed rounded-lg p-6 min-h-[200px] flex flex-col items-center justify-center ${
+              errors.imageUrls ? "border-red-500" : "border-gray-300"
+            }`}
           >
             <ImageIcon className="w-10 h-10 text-gray-500 mb-2" />
             <p className="text-sm">Drag images here or</p>
@@ -215,6 +269,10 @@ export default function HospitalInformationStep({
             </label>
             <p className="text-xs text-gray-500 mt-2">Max 10 images</p>
           </div>
+
+          {errors.imageUrls && (
+            <p className="text-red-500 text-sm mt-2">{errors.imageUrls}</p>
+          )}
 
           {data?.imageUrls?.length > 0 && (
             <div className="mt-3 space-y-1">
@@ -236,14 +294,19 @@ export default function HospitalInformationStep({
 function Section({
   title,
   children,
+  error,
 }: {
   title: string;
   children: React.ReactNode;
+  error?: string;
 }) {
   return (
     <div>
       <h2 className="font-semibold mb-2">{title}</h2>
       {children}
+      {error && (
+        <p className="text-red-500 text-sm mt-1">{error}</p>
+      )}
     </div>
   );
 }
@@ -253,18 +316,22 @@ function Select<T extends { _id: string }>({
   options,
   getLabel,
   onSelect,
+  error,
 }: {
   label: string;
   options: T[];
   getLabel: (item: T) => string;
   onSelect: (id: string) => void;
+  error?: string;
 }) {
   return (
     <div className="mb-3">
       <label className="text-sm">{label}</label>
       <div className="relative">
         <select
-          className="border px-3 py-2 w-full"
+          className={`border px-3 py-2 w-full ${
+            error ? "border-red-500" : "border-gray-300"
+          }`}
           onChange={(e) => onSelect(e.target.value)}
         >
           <option value="">Select</option>
@@ -274,7 +341,7 @@ function Select<T extends { _id: string }>({
             </option>
           ))}
         </select>
-        <ChevronDown className="absolute right-2 top-3 h-4 w-4" />
+        <ChevronDown className="absolute right-2 top-3 h-4 w-4 pointer-events-none" />
       </div>
     </div>
   );
