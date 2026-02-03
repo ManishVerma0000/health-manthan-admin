@@ -1,8 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
-  // baseURL: "http://localhost:3000", 
-  baseURL: "https://api.healthvandanam.com", 
+  baseURL: "http://localhost:3000",
+  // baseURL: "https://api.healthvandanam.com",
   headers: {
     "Content-Type": "application/json",
   },
@@ -15,12 +15,13 @@ api.interceptors.request.use(
     const token = localStorage.getItem("token");
 
     if (token) {
+      config.headers = config.headers ?? {};
       config.headers.Authorization = `Bearer ${token}`;
     }
 
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 /* Response Interceptor */
@@ -32,7 +33,7 @@ api.interceptors.response.use(
       window.location.href = "/login";
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;

@@ -24,7 +24,7 @@ export default function AddGovernmentPanelPage() {
     try {
       setLoading(true);
       const res = await createGovernmentPanelApi({ panelName });
-      if (!res.success) throw new Error();
+      if (!res?.success) throw new Error();
       setPanelName("");
       setToast({
         show: true,

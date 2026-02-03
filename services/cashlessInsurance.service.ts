@@ -7,17 +7,17 @@ export const createCashlessInsuranceApi = async (payload: {
     "/cashless-insurance-company",
     payload
   );
-  return response.data;
+  return response?.data;
 };
 
 
 export const getCashlessInsuranceListApi = async () => {
   const response = await api.get("/cashless-insurance-company/list");
-  return response.data;
+  return response?.data;
 };
 
 // DELETE
 export const deleteCashlessInsuranceApi = async (id: string) => {
   const response = await api.delete(`/cashless-insurance-company/${id}`);
-  return response.data;
+  return response?.data;
 };

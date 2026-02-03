@@ -27,8 +27,8 @@ export default function AddCashlessInsurancePage() {
       const res = await createCashlessInsuranceApi({
         cashlessInsuranceCompany: name.trim(),
       });
-      if (!res.success) {
-        throw new Error(res.message || "Failed");
+      if (!res?.success) {
+        throw new Error(res?.message || "Failed");
       }
       setToast({
         show: true,

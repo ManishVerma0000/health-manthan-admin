@@ -33,7 +33,7 @@ export default function AddTreatedByPage() {
       const res = await createTreatedByApi({
         treatedByName,
       });
-      if (!res.success) throw new Error();
+      if (!res?.success) throw new Error();
 
       setToast({
         show: true,

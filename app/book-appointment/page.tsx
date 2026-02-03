@@ -39,8 +39,8 @@ export default function BookAppointmentList() {
         search,
       });
 
-      if (res.success) {
-        setData(res.data);
+      if (res?.success) {
+        setData(res?.data);
       }
     } catch (error) {
       console.error(error);

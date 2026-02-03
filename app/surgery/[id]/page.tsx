@@ -69,7 +69,7 @@ const EyeSurgeryDetails: React.FC = () => {
       try {
         const res = await getSurgeryById(id);
 
-        setSurgery(res.data);
+        setSurgery(res?.data);
       } catch (err) {
         console.error("API Error:", err);
       } finally {

@@ -44,11 +44,11 @@ export default function loginPage() {
     } catch (err: any) {
       setToast({
         show: true,
-        message: err.response?.data?.message || "Login failed",
+        message: err?.response?.data?.message || err?.message || "Login failed",
         type: "error",
       });
 
-      setError(err.response?.data?.message || err.message);
+      setError(err?.response?.data?.message || err?.message || "Login failed");
     } finally {
       setLoading(false);
     }

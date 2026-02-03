@@ -29,8 +29,8 @@ export default function ContactUsList() {
         search,
       });
 
-      if (res.success) {
-        setData(res.data);
+      if (res?.success) {
+        setData(res?.data);
       }
     } catch (error) {
       console.error(error);

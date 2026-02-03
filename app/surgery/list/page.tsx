@@ -65,7 +65,7 @@ export default function SurgeryPage() {
 
         const res = await getSurgeryListApi();
 
-        const mapped: SurgeryItem[] = res.data.map((item: any) => ({
+        const mapped: SurgeryItem[] = (res?.data ?? []).map((item: any) => ({
           id: item._id,
           surgeryName: item.surgeryName,
           surgeryCategory: item.surgeryCategory,

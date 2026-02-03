@@ -2,7 +2,7 @@ import api from "@/api/api";
 
 export const getCategoriesApi = async () => {
   const response: any = await api.get("/categories/list");
-  return response.data;
+  return response?.data;
 };
 
 /**
@@ -18,7 +18,7 @@ export const uploadImageApi = async (file: File) => {
     },
   });
 
-  return response.data; // { success, file: { url } }
+  return response?.data; // { success, file: { url } }
 };
 
 /**
@@ -31,7 +31,7 @@ export const createCategoryApi = async (payload: {
   iconImage: string;
 }) => {
   const response: any = await api.post("/categories", payload);
-  return response.data;
+  return response?.data;
 };
 
 export const deleteCategoryApi = (id: string) => {

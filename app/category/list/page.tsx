@@ -32,7 +32,6 @@ interface SurgeryCategory {
 export default function SurgeryCategoryPage() {
   const router = useRouter();
 
-  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [data, setData] = useState<SurgeryCategory[]>([]);
   const [filteredData, setFilteredData] = useState<SurgeryCategory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,7 +46,7 @@ export default function SurgeryCategoryPage() {
       try {
         const res = await getCategoriesApi();
 
-        const mapped: SurgeryCategory[] = res.data.map((item: any) => ({
+        const mapped: SurgeryCategory[] = (res?.data ?? []).map((item: any) => ({
           id: item._id,
           categoryName: item.categoryName,
           imageUrl: item.imageUrl,
@@ -78,7 +77,7 @@ export default function SurgeryCategoryPage() {
     const q = search.toLowerCase();
 
     setFilteredData(
-      data.filter((item) => item.categoryName.toLowerCase().includes(q)),
+      data.filter((item) => item?.categoryName?.toLowerCase()?.includes(q)),
     );
 
     setPage(1);

@@ -33,7 +33,7 @@ export default function HospitalDetailsStep({
     const fetchCategories = async () => {
       try {
         const res = await fetchHospitalCategoriesApi();
-        setCategories(res.data || []);
+        setCategories(res?.data ?? []);
       } catch (error) {
         console.error("Failed to fetch categories", error);
       }

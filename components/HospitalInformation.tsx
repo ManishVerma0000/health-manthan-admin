@@ -61,9 +61,9 @@ export default function HospitalInformationStep({
           getGovernmentPanelListApi(),
         ]);
 
-        setInsuranceCompanies(i.data ?? []);
-        setCashlessCompanies(c.data ?? []);
-        setGovernmentPanels(g.data ?? []);
+        setInsuranceCompanies(i?.data ?? []);
+        setCashlessCompanies(c?.data ?? []);
+        setGovernmentPanels(g?.data ?? []);
       } catch (error) {
         console.error("Failed to fetch master data", error);
       }
@@ -77,19 +77,19 @@ export default function HospitalInformationStep({
   const validate = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!data.treatmentList.length) {
+    if (!data?.treatmentList?.length) {
       newErrors.treatmentList = "Select at least one insurance company";
     }
 
-    if (!data.cashlessList.length) {
+    if (!data?.cashlessList?.length) {
       newErrors.cashlessList = "Select at least one cashless company";
     }
 
-    if (!data.panelList.length) {
+    if (!data?.panelList?.length) {
       newErrors.panelList = "Select at least one government panel";
     }
 
-    if (!data.imageUrls.length) {
+    if (!data?.imageUrls?.length) {
       newErrors.imageUrls = "Upload at least one hospital image";
     }
 
@@ -104,9 +104,9 @@ export default function HospitalInformationStep({
     key: "treatmentList" | "cashlessList" | "panelList",
     id: string
   ) => {
-    if (!id || data[key].includes(id)) return;
+    if (!id || data?.[key]?.includes(id)) return;
 
-    onChange({ [key]: [...data[key], id] });
+    onChange({ [key]: [...(data?.[key] ?? []), id] });
 
     // Remove error when fixed
     setErrors((prev) => {
@@ -120,7 +120,7 @@ export default function HospitalInformationStep({
     key: "treatmentList" | "cashlessList" | "panelList",
     index: number
   ) => {
-    const updated = [...data[key]];
+    const updated = [...(data?.[key] ?? [])];
     updated.splice(index, 1);
     onChange({ [key]: updated });
   };
@@ -134,7 +134,7 @@ export default function HospitalInformationStep({
       const uploadedUrls = await Promise.all(
         files.map(async (file) => {
           const res = await uploadImageApi(file);
-          return res?.success ? res.file.url : null;
+          return res?.success ? res?.file?.url ?? null : null;
         })
       );
 
@@ -143,7 +143,7 @@ export default function HospitalInformationStep({
       );
 
       onChange({
-        imageUrls: [...data.imageUrls, ...validUrls].slice(0, 10),
+        imageUrls: [...(data?.imageUrls ?? []), ...validUrls].slice(0, 10),
       });
 
       // Clear image error
@@ -186,7 +186,7 @@ export default function HospitalInformationStep({
             />
 
             <Chips
-              ids={data.treatmentList}
+              ids={data?.treatmentList ?? []}
               getName={(id) =>
                 insuranceCompanies.find((i) => i._id === id)
                   ?.insuranceCompany || id
@@ -211,7 +211,7 @@ export default function HospitalInformationStep({
             />
 
             <Chips
-              ids={data.cashlessList}
+              ids={data?.cashlessList ?? []}
               getName={(id) =>
                 cashlessCompanies.find((i) => i._id === id)
                   ?.cashlessInsuranceCompany || id
@@ -236,7 +236,7 @@ export default function HospitalInformationStep({
             />
 
             <Chips
-              ids={data.panelList}
+              ids={data?.panelList ?? []}
               getName={(id) =>
                 governmentPanels.find((i) => i._id === id)?.panelName || id
               }
@@ -255,7 +255,7 @@ export default function HospitalInformationStep({
             <textarea
               className="w-full border px-3 py-2 rounded-md min-h-[100px]"
               placeholder="Enter hospital details..."
-              value={data.hospitaldetails || ""}
+              value={data?.hospitaldetails ?? ""}
               onChange={(e) => onChange({ hospitaldetails: e.target.value })}
             />
           </Section>
@@ -309,9 +309,9 @@ export default function HospitalInformationStep({
             </p>
           )}
 
-          {data.imageUrls.length > 0 && (
+          {data?.imageUrls?.length > 0 && (
             <div className="mt-3 space-y-1">
-              {data.imageUrls.map((url: any, i: number) => (
+              {data?.imageUrls?.map((url: any, i: number) => (
                 <p key={i} className="text-xs text-green-600 truncate">
                   {url}
                 </p>

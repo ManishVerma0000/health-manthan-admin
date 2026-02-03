@@ -64,7 +64,7 @@ export default function HospitalCategoryListPage() {
       const res = await fetchHospitalCategoriesApi();
 
       if (res?.success) {
-        setCategories(res.data);
+        setCategories(res?.data ?? []);
       }
     } catch (error) {
       console.error("Fetch error:", error);
@@ -142,9 +142,9 @@ export default function HospitalCategoryListPage() {
      FILTER
   =============================== */
   const filteredCategories = categories.filter((cat) =>
-    cat.hospitalCategory
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase()),
+    cat?.hospitalCategory
+      ?.toLowerCase()
+      ?.includes(searchTerm.toLowerCase()),
   );
 
   /* ===============================

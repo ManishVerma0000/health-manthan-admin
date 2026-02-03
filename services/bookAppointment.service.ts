@@ -8,5 +8,5 @@ export const getBookAppointmentListApi = async (params?: {
   const response = await api.get("/book-appointment/list", {
     params,
   });
-  return response.data;
+  return response?.data;
 };

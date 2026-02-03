@@ -2,12 +2,12 @@ import api from "@/api/api";
 
 export const getDoctorList = async () => {
   const res = await api.get(`/doctor/list`);
-  return res.data;
+  return res?.data;
 };
 
 export const createDoctorApi = async (payload: any) => {
   const response = await api.post("/doctor", payload);
-  return response.data;
+  return response?.data;
 };
 
 export const deleteDoctorApi = (id: string) => {
@@ -16,11 +16,11 @@ export const deleteDoctorApi = (id: string) => {
 
 export const getDoctorById = async (id: string) => {
   const res = await api.get(`/doctor/${id}`);
-  return res.data;
+  return res?.data;
 };
 
 
 export const getDoctorsByHospital = async (hospitalId: string) => {
   const res = await api.get(`/doctor/hospital/${hospitalId}`);
-  return res.data;
+  return res?.data;
 };

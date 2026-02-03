@@ -63,7 +63,7 @@ export default function InsuranceCompanyListPage() {
       const res = await fetchInsuranceCompaniesApi();
 
       if (res?.success) {
-        setCompanies(res.data);
+        setCompanies(res?.data ?? []);
       }
     } catch (error) {
       console.error("Fetch error:", error);
@@ -127,9 +127,9 @@ export default function InsuranceCompanyListPage() {
   =============================== */
   const filteredCompanies = companies.filter(
     (company) =>
-      company.insuranceCompany
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()),
+      company?.insuranceCompany
+        ?.toLowerCase()
+        ?.includes(searchTerm.toLowerCase()),
   );
 
   /* ===============================

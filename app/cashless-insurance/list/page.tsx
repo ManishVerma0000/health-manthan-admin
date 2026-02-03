@@ -140,9 +140,9 @@ export default function CashlessInsuranceListPage() {
      FILTER
   =============================== */
   const filteredList = list.filter((item) =>
-    item.cashlessInsuranceCompany
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase()),
+    item?.cashlessInsuranceCompany
+      ?.toLowerCase()
+      ?.includes(searchTerm.toLowerCase()),
   );
 
   /* ===============================

@@ -69,9 +69,9 @@ export default function AddDoctorPage() {
     try {
       const res = await uploadImageApi(imageFile);
 
-      if (!res.success) throw new Error("Upload failed");
+      if (!res?.success) throw new Error("Upload failed");
 
-      setImageUrl(res.file.url);
+      setImageUrl(res?.file?.url ?? "");
     } catch (err) {
       console.error(err);
       alert("Image upload failed");
@@ -91,7 +91,7 @@ export default function AddDoctorPage() {
       const res = await getHospitalList();
 
       if (res?.success) {
-        setHospitals(res.data);
+        setHospitals(res?.data ?? []);
       }
     } catch (err) {
       console.error(err);
@@ -179,7 +179,7 @@ export default function AddDoctorPage() {
     };
     try {
       const res = await createDoctorApi(payload);
-      if (!res.success) throw new Error("Failed");
+      if (!res?.success) throw new Error("Failed");
       showToast("Doctor created successfully 🎉", "success");
     } catch (err) {
       console.error(err);

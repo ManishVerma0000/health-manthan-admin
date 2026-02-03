@@ -75,9 +75,9 @@ export default function DoctorListPage() {
 
       const res = await getDoctorList();
 
-      if (res.success) {
-        setData(res.data);
-        setFilteredData(res.data);
+      if (res?.success) {
+        setData(res?.data ?? []);
+        setFilteredData(res?.data ?? []);
       }
     } catch (error) {
       console.error("Fetch error:", error);
@@ -104,7 +104,7 @@ export default function DoctorListPage() {
 
     setFilteredData(
       data.filter((item) =>
-        `${item.hospital?.hospitalName} ${item.hospital?.city}`
+        `${item?.hospital?.hospitalName ?? ""} ${item?.hospital?.city ?? ""}`
           .toLowerCase()
           .includes(q),
       ),
@@ -128,7 +128,7 @@ export default function DoctorListPage() {
 
       await deleteDoctorApi(deleteId);
 
-      const updated = data.filter((item) => item._id !== deleteId);
+      const updated = data.filter((item) => item?._id !== deleteId);
 
       setData(updated);
       setFilteredData(updated);
@@ -272,7 +272,7 @@ export default function DoctorListPage() {
                         <td className="px-6 py-4">
                           {doctor.imageUrl?.length ? (
                             <img
-                              src={doctor.imageUrl[0]}
+                              src={doctor?.imageUrl?.[0]}
                               alt="doctor"
                               className="w-12 h-12 rounded-lg object-cover"
                             />
@@ -294,7 +294,7 @@ export default function DoctorListPage() {
 
                         {/* Created */}
                         <td className="px-6 py-4 text-xs text-gray-500">
-                          {new Date(doctor.createdAt).toLocaleDateString()}
+                          {doctor?.createdAt ? new Date(doctor.createdAt).toLocaleDateString() : ""}
                         </td>
 
                         {/* Actions */}

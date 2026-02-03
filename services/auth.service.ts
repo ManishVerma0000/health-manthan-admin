@@ -7,5 +7,5 @@ export const loginApi = async (payload: {
   password: string;
 }) => {
   const response:any = await api.post("/admin/login", payload);
-  return response.data;
+  return response?.data;
 };

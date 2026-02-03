@@ -109,7 +109,7 @@
 //       if (!result.success) {
 //         throw new Error(result.message || "Hospital creation failed");
 //       }
-//       console.log("✅ Hospital created:", result.data);
+//       console.log("✅ Hospital created:", result?.data);
 //       setFormData(initialFormState);
 //       setStep(1);
 //       alert("Hospital created successfully 🎉");
@@ -279,7 +279,7 @@ export default function HospitalCreatePage() {
         throw new Error(result?.message || "Hospital creation failed");
       }
 
-      console.log("✅ Hospital created:", result.data);
+      console.log("✅ Hospital created:", result?.data);
 
       showToast("Hospital created successfully 🎉", "success");
 

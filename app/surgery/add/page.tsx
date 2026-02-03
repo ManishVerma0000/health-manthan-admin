@@ -118,7 +118,7 @@ const SurgeryDetailsStep: React.FC<{
       const res = await getTreatedByListApi();
 
       if (res?.success) {
-        setTreatedByList(res.data);
+        setTreatedByList(res?.data ?? []);
       }
     } catch (err) {
       console.error("Fetch treatedBy failed", err);
@@ -134,7 +134,7 @@ const SurgeryDetailsStep: React.FC<{
       const res = await getCategoriesApi();
 
       if (res?.success) {
-        setCategories(res.data);
+        setCategories(res?.data ?? []);
       }
     } catch (err) {
       console.error("Fetch categories failed", err);

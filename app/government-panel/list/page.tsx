@@ -112,7 +112,7 @@ export default function GovernmentPanelListPage() {
      FILTER
   =============================== */
   const filteredPanels = panels.filter((panel) =>
-    panel.panelName.toLowerCase().includes(searchTerm.toLowerCase()),
+    panel?.panelName?.toLowerCase()?.includes(searchTerm.toLowerCase()),
   );
 
   /* ===============================

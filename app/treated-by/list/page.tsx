@@ -140,9 +140,9 @@ export default function TreatedByListPage() {
      FILTER
   =============================== */
   const filteredList = list.filter((item) =>
-    item.treatedByName
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase()),
+    item?.treatedByName
+      ?.toLowerCase()
+      ?.includes(searchTerm.toLowerCase()),
   );
 
   /* ===============================

@@ -2,7 +2,7 @@ import api from "@/api/api";
 
 export const getHospitalList = async () => {
   const res = await api.get("/hospital/list");
-  return res.data;
+  return res?.data;
 };
 
 export interface CreateHospitalPayload {
@@ -28,20 +28,20 @@ export interface CreateHospitalPayload {
 
 export const createHospitalApi = async (payload: any) => {
   const response = await api.post("/hospital", payload);
-  return response.data;
+  return response?.data;
 };
 
 export const createHospitalCategoryApi = async (hospitalCategory: string) => {
   const res = await api.post("/hospital-category", {
     hospitalCategory,
   });
-  return res.data;
+  return res?.data;
 };
 
 // GET: list hospital categories
 export const fetchHospitalCategoriesApi = async () => {
   const res = await api.get("/hospital-category/list");
-  return res.data;
+  return res?.data;
 };
 
 // DELETE: hospital category by id
@@ -55,5 +55,5 @@ export const deleteHospitalCategoryApi = (id: string) => {
 
 export const getHospitalById = async (id: string) => {
   const res = await api.get(`/hospital/${id}`);
-  return res.data;
+  return res?.data;
 };

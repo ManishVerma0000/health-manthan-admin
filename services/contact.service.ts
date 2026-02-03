@@ -8,5 +8,5 @@ export const getContactListApi = async (params?: {
   const response = await api.get("/contact-us/list", {
     params,
   });
-  return response.data;
+  return response?.data;
 };

@@ -113,7 +113,7 @@ const HospitalProfile: React.FC = () => {
     const fetchHospital = async () => {
       try {
         const res = await getHospitalById(id);
-        setHospital(res.data);
+        setHospital(res?.data ?? null);
       } catch (err) {
         console.error("Hospital API Error:", err);
       } finally {
@@ -151,7 +151,7 @@ const HospitalProfile: React.FC = () => {
       {/* ================= HEADER ================= */}
       <div className="bg-white border-b px-6 py-4">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-semibold">{hospital.hospitalName}</h1>
+          <h1 className="text-xl font-semibold">{hospital?.hospitalName}</h1>
 
           <button className="text-blue-600 text-sm font-medium">
             Edit Hospital
@@ -167,14 +167,14 @@ const HospitalProfile: React.FC = () => {
               {/* IMAGE */}
               <div className="flex items-start mb-4">
                 <img
-                  src={hospital.iconUrl}
-                  alt={hospital.hospitalName}
+                  src={hospital?.iconUrl}
+                  alt={hospital?.hospitalName}
                   className="w-20 h-20 rounded-lg object-cover mr-4"
                 />
 
                 <div className="flex-1">
                   <h2 className="text-xl font-bold mb-2">
-                    {hospital.hospitalName}
+                    {hospital?.hospitalName}
                   </h2>
 
                   <div className="flex items-center mb-2">
@@ -197,13 +197,13 @@ const HospitalProfile: React.FC = () => {
                 <MapPin className="w-4 h-4 mt-1 mr-2 text-gray-500" />
 
                 <p className="text-sm text-gray-600">
-                  {hospital.location}, {hospital.city}
+                  {hospital?.location}, {hospital?.city}
                 </p>
               </div>
 
               {/* DIRECTION */}
               <a
-                href={hospital.mapDirection}
+                href={hospital?.mapDirection}
                 target="_blank"
                 className="w-full mb-6 px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 flex justify-center text-sm font-medium"
               >
@@ -216,20 +216,20 @@ const HospitalProfile: React.FC = () => {
                 <div className="flex items-center">
                   <Phone className="w-4 h-4 text-blue-600 mr-3" />
                   <span className="text-sm font-medium">
-                    {hospital.contactNumber}
+                    {hospital?.contactNumber}
                   </span>
                 </div>
 
                 <div className="flex items-center">
                   <Phone className="w-4 h-4 text-blue-600 mr-3" />
                   <span className="text-sm font-medium">
-                    {hospital.whatsapp}
+                    {hospital?.whatsapp}
                   </span>
                 </div>
 
                 <div className="flex items-center">
                   <Mail className="w-4 h-4 text-blue-600 mr-3" />
-                  <span className="text-sm font-medium">{hospital.email}</span>
+                  <span className="text-sm font-medium">{hospital?.email}</span>
                 </div>
               </div>
 
@@ -238,7 +238,7 @@ const HospitalProfile: React.FC = () => {
                 <h3 className="text-sm font-bold mb-3">Timing</h3>
 
                 <div className="space-y-2">
-                  {hospital.timings.map((item, i) => (
+                  {hospital?.timings?.map((item, i) => (
                     <div key={i} className="flex justify-between text-sm">
                       <span className="text-gray-600">{item.days}</span>
 
@@ -283,7 +283,7 @@ const HospitalProfile: React.FC = () => {
                     </h3>
 
                     <ul className="space-y-3">
-                      {hospital.treatmentList.map((item) => (
+                      {hospital?.treatmentList?.map((item) => (
                         <li
                           key={item._id}
                           className="p-3 border rounded bg-gray-50"
@@ -292,7 +292,7 @@ const HospitalProfile: React.FC = () => {
                         </li>
                       ))}
 
-                      {hospital.treatmentList.length === 0 && (
+                      {hospital?.treatmentList?.length === 0 && (
                         <p className="text-gray-500">No insurance available</p>
                       )}
                     </ul>
@@ -307,7 +307,7 @@ const HospitalProfile: React.FC = () => {
                     </h3>
 
                     <ul className="space-y-3">
-                      {hospital.cashlessList.map((item) => (
+                      {hospital?.cashlessList?.map((item) => (
                         <li
                           key={item._id}
                           className="p-3 border rounded bg-gray-50"
@@ -316,7 +316,7 @@ const HospitalProfile: React.FC = () => {
                         </li>
                       ))}
 
-                      {hospital.cashlessList.length === 0 && (
+                      {hospital?.cashlessList?.length === 0 && (
                         <p className="text-gray-500">No cashless insurance</p>
                       )}
                     </ul>
@@ -331,7 +331,7 @@ const HospitalProfile: React.FC = () => {
                     </h3>
 
                     <ul className="space-y-3">
-                      {hospital.panelList.map((item) => (
+                      {hospital?.panelList?.map((item) => (
                         <li
                           key={item._id}
                           className="p-3 border rounded bg-gray-50"
@@ -340,7 +340,7 @@ const HospitalProfile: React.FC = () => {
                         </li>
                       ))}
 
-                      {hospital.panelList.length === 0 && (
+                      {hospital?.panelList?.length === 0 && (
                         <p className="text-gray-500">No government panel</p>
                       )}
                     </ul>
