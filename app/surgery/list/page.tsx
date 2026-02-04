@@ -64,11 +64,13 @@ export default function SurgeryPage() {
         setLoading(true);
 
         const res = await getSurgeryListApi();
+        console.log(res?.data,'res')
 
         const mapped: SurgeryItem[] = (res?.data ?? []).map((item: any) => ({
           id: item._id,
           surgeryName: item.surgeryName,
-          surgeryCategory: item.surgeryCategory,
+           surgeryCategory: item.surgeryCategory?.categoryName || "",
+
           icon: item.icon,
           image: item.images?.[0] || "",
           status: true,
@@ -266,7 +268,8 @@ export default function SurgeryPage() {
                         {/* Category */}
                         <td className="px-6 py-4">
                           <span className="px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
-                            {item.surgeryCategory}
+                            {/* {item.surgeryCategory} */}
+                            {item.surgeryCategory || ""}
                           </span>
                         </td>
 
