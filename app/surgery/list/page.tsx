@@ -116,6 +116,7 @@ export default function SurgeryPage() {
   }, [search, data]);
 
   /* ------------------ Pagination ------------------ */
+  const totalPages = Math.ceil(filteredData.length / limit);
   const start = (page - 1) * limit;
   const end = start + limit;
 
@@ -157,7 +158,7 @@ export default function SurgeryPage() {
 
   /* ------------------ Render ------------------ */
   return (
-    <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Toast */}
       <Toast
         show={toast.show}
@@ -172,7 +173,7 @@ export default function SurgeryPage() {
         onSearchChange={(value) => setSearch(value)}
       />
 
-      <div className="flex-1 overflow-auto p-6 md:p-8">
+      <div className="flex-1 p-6 md:p-8">
         <div className="max-w-7xl mx-auto">
           {/* Page Header */}
           <div className="mb-6 flex items-center justify-between">
@@ -194,7 +195,7 @@ export default function SurgeryPage() {
           </div>
 
           {/* Table Card */}
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden h-[65vh] flex flex-col">
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
             {/* Loading */}
             {loading && (
               <div className="flex flex-col items-center py-20">
@@ -219,7 +220,7 @@ export default function SurgeryPage() {
 
             {/* Table */}
             {!loading && paginatedData.length > 0 && (
-              <div className="h-full overflow-x-auto">
+              <div className="overflow-x-auto">
                 <table className="min-w-full">
                   {/* Head */}
                   <thead className="bg-indigo-50">
@@ -268,8 +269,7 @@ export default function SurgeryPage() {
                         {/* Category */}
                         <td className="px-6 py-4">
                           <span className="px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
-                            {/* {item.surgeryCategory} */}
-                            {item.surgeryCategory || ""}
+                            {item.surgeryCategory || "Uncategorized"}
                           </span>
                         </td>
 
@@ -282,7 +282,9 @@ export default function SurgeryPage() {
                               className="w-12 h-12 rounded-lg object-cover"
                             />
                           ) : (
-                            <Image className="text-gray-400" />
+                            <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center">
+                              <Image className="text-gray-400" size={20} />
+                            </div>
                           )}
                         </td>
 
@@ -295,7 +297,9 @@ export default function SurgeryPage() {
                               className="w-12 h-12 rounded-lg object-cover"
                             />
                           ) : (
-                            <Image className="text-gray-400" />
+                            <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center">
+                              <Image className="text-gray-400" size={20} />
+                            </div>
                           )}
                         </td>
 
@@ -307,7 +311,7 @@ export default function SurgeryPage() {
                                 e.stopPropagation();
                                 setDeleteId(item.id);
                               }}
-                              className="p-2 text-red-600 hover:bg-red-50 rounded"
+                              className="p-2 text-red-600 hover:bg-red-50 rounded transition"
                             >
                               <Trash2 size={18} />
                             </button>
@@ -325,26 +329,28 @@ export default function SurgeryPage() {
           {!loading && filteredData.length > 0 && (
             <div className="mt-6 flex items-center justify-between">
               <p className="text-sm text-gray-600">
-                Page <span className="font-semibold">{page}</span>
+                Showing <span className="font-semibold">{start + 1}</span> to{" "}
+                <span className="font-semibold">{Math.min(end, filteredData.length)}</span> of{" "}
+                <span className="font-semibold">{filteredData.length}</span> results
               </p>
 
               <div className="flex items-center gap-2">
                 <button
                   disabled={page === 1}
                   onClick={() => setPage(page - 1)}
-                  className="px-4 py-2 border rounded-lg disabled:opacity-50"
+                  className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition"
                 >
                   <ChevronLeft size={18} />
                 </button>
 
                 <span className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold">
-                  {page}
+                  {page} / {totalPages}
                 </span>
 
                 <button
-                  disabled={end >= filteredData.length}
+                  disabled={page >= totalPages}
                   onClick={() => setPage(page + 1)}
-                  className="px-4 py-2 border rounded-lg disabled:opacity-50"
+                  className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition"
                 >
                   <ChevronRight size={18} />
                 </button>

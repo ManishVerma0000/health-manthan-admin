@@ -167,13 +167,7 @@ export default function HospitalCategoryListPage() {
      UI
   =============================== */
   return (
-    <div className="min-h-screen p-6 md:p-8">
-
-      {/* Header */}
-      <Header
-        searchValue={searchTerm}
-        onSearchChange={(value) => setSearchTerm(value)}
-      />
+    <div className="min-h-screen bg-gray-50">
 
       {/* Toast */}
       <Toast
@@ -185,209 +179,217 @@ export default function HospitalCategoryListPage() {
         }
       />
 
-      <div className="max-w-5xl mx-auto">
+      {/* Header */}
+      <Header
+        searchValue={searchTerm}
+        onSearchChange={(value) => setSearchTerm(value)}
+      />
 
-        {/* Page Header */}
-        <div className="mb-8">
+      <div className="p-6 md:p-8">
+        <div className="max-w-5xl mx-auto">
 
-          <div className="flex items-center justify-between mb-6">
+          {/* Page Header */}
+          <div className="mb-8">
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between mb-6">
 
-              <div className="p-2 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-200">
-                <Building2 className="text-white" size={28} />
+              <div className="flex items-center gap-3">
+
+                <div className="p-2 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-200">
+                  <Building2 className="text-white" size={28} />
+                </div>
+
+                <h1 className="text-xl font-bold text-gray-900">
+                  Hospital Categories
+                </h1>
+
               </div>
 
-              <h1 className="text-xl font-bold text-gray-900">
-                Hospital Categories
-              </h1>
+              <button
+                onClick={() =>
+                  router.push("/hospital-category/add")
+                }
+                className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium shadow-lg shadow-indigo-200 transition-all"
+              >
+                <Plus size={20} />
+                New
+              </button>
 
             </div>
-
-            <button
-              onClick={() =>
-                router.push("/hospital-category/add")
-              }
-              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium shadow-lg shadow-indigo-200 transition-all"
-            >
-              <Plus size={20} />
-              New
-            </button>
 
           </div>
 
-        </div>
+          {/* Content Card */}
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
 
-        {/* Content Card */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+            {/* Loading */}
+            {loading && (
+              <div className="flex flex-col items-center justify-center py-20">
 
-          {/* Loading */}
-          {loading && (
-            <div className="flex flex-col items-center justify-center py-20">
+                <Loader2
+                  className="animate-spin text-indigo-600 mb-4"
+                  size={40}
+                />
 
-              <Loader2
-                className="animate-spin text-indigo-600 mb-4"
-                size={40}
-              />
-
-              <p className="text-gray-600 font-medium">
-                Loading categories...
-              </p>
-
-            </div>
-          )}
-
-          {/* Empty */}
-          {!loading && paginatedCategories.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-20 px-4">
-
-              <div className="bg-gray-100 rounded-full p-6 mb-4">
-                <FolderX size={48} className="text-gray-400" />
-              </div>
-
-              <p className="text-xl font-semibold text-gray-800 mb-2">
-                {searchTerm
-                  ? "No results found"
-                  : "No categories yet"}
-              </p>
-
-            </div>
-          )}
-
-          {/* Grid */}
-          {!loading && paginatedCategories.length > 0 && (
-            <div className="p-6">
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                {paginatedCategories.map(
-                  (category, index) => (
-                    <div
-                      key={category._id}
-                      className="group relative bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-all"
-                    >
-
-                      <div className="absolute top-4 right-4 bg-indigo-100 text-indigo-700 text-xs font-semibold px-2.5 py-1 rounded-full">
-                        #
-                        {startIndex +
-                          index +
-                          1}
-                      </div>
-
-                      <div className="flex items-start gap-4">
-
-                        <div className="bg-indigo-600 rounded-lg p-3 shadow-md">
-                          <Building2
-                            className="text-white"
-                            size={24}
-                          />
-                        </div>
-
-                        <div className="flex-1 pt-1">
-
-                          <h3 className="font-semibold text-gray-900 text-lg truncate pr-8">
-                            {category.hospitalCategory}
-                          </h3>
-
-                          <p className="text-sm text-gray-500">
-                            Hospital Category
-                          </p>
-
-                        </div>
-
-                      </div>
-
-                      {/* Actions */}
-                      <div className="mt-4 pt-4 border-t border-gray-200 flex justify-end opacity-0 group-hover:opacity-100 transition">
-
-                        <button
-                          onClick={() =>
-                            setDeleteId(category._id)
-                          }
-                          className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg"
-                        >
-                          <Trash2 size={16} />
-                          Delete
-                        </button>
-
-                      </div>
-
-                    </div>
-                  ),
-                )}
+                <p className="text-gray-600 font-medium">
+                  Loading categories...
+                </p>
 
               </div>
-            </div>
-          )}
+            )}
 
-        </div>
+            {/* Empty */}
+            {!loading && paginatedCategories.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-20 px-4">
 
-        {/* ================= PAGINATION ================= */}
-        {totalPages > 1 && (
-          <div className="mt-6 flex flex-col items-center gap-3">
+                <div className="bg-gray-100 rounded-full p-6 mb-4">
+                  <FolderX size={48} className="text-gray-400" />
+                </div>
 
-            {/* Info */}
-            <p className="text-sm text-gray-500">
-              Showing {startIndex + 1}–
-              {Math.min(
-                startIndex + itemsPerPage,
-                filteredCategories.length,
-              )}{" "}
-              of {filteredCategories.length}
-            </p>
+                <p className="text-xl font-semibold text-gray-800 mb-2">
+                  {searchTerm
+                    ? "No results found"
+                    : "No categories yet"}
+                </p>
 
-            <div className="flex items-center gap-3">
+              </div>
+            )}
 
-              {/* Prev */}
-              <button
-                disabled={currentPage === 1}
-                onClick={() =>
-                  setCurrentPage((p) => p - 1)
-                }
-                className="p-2 rounded border disabled:opacity-40 hover:bg-gray-100"
-              >
-                <ChevronLeft size={18} />
-              </button>
+            {/* Grid */}
+            {!loading && paginatedCategories.length > 0 && (
+              <div className="p-6">
 
-              {/* Pages */}
-              {Array.from(
-                { length: totalPages },
-                (_, i) => i + 1,
-              ).map((page) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                  {paginatedCategories.map(
+                    (category, index) => (
+                      <div
+                        key={category._id}
+                        className="group relative bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-all"
+                      >
+
+                        <div className="absolute top-4 right-4 bg-indigo-100 text-indigo-700 text-xs font-semibold px-2.5 py-1 rounded-full">
+                          #
+                          {startIndex +
+                            index +
+                            1}
+                        </div>
+
+                        <div className="flex items-start gap-4">
+
+                          <div className="bg-indigo-600 rounded-lg p-3 shadow-md">
+                            <Building2
+                              className="text-white"
+                              size={24}
+                            />
+                          </div>
+
+                          <div className="flex-1 pt-1">
+
+                            <h3 className="font-semibold text-gray-900 text-lg truncate pr-8">
+                              {category.hospitalCategory}
+                            </h3>
+
+                            <p className="text-sm text-gray-500">
+                              Hospital Category
+                            </p>
+
+                          </div>
+
+                        </div>
+
+                        {/* Actions */}
+                        <div className="mt-4 pt-4 border-t border-gray-200 flex justify-end opacity-0 group-hover:opacity-100 transition">
+
+                          <button
+                            onClick={() =>
+                              setDeleteId(category._id)
+                            }
+                            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition"
+                          >
+                            <Trash2 size={16} />
+                            Delete
+                          </button>
+
+                        </div>
+
+                      </div>
+                    ),
+                  )}
+
+                </div>
+              </div>
+            )}
+
+          </div>
+
+          {/* ================= PAGINATION ================= */}
+          {!loading && totalPages > 1 && (
+            <div className="mt-6 flex flex-col items-center gap-3">
+
+              {/* Info */}
+              <p className="text-sm text-gray-500">
+                Showing {startIndex + 1}–
+                {Math.min(
+                  startIndex + itemsPerPage,
+                  filteredCategories.length,
+                )}{" "}
+                of {filteredCategories.length}
+              </p>
+
+              <div className="flex items-center gap-3">
+
+                {/* Prev */}
                 <button
-                  key={page}
+                  disabled={currentPage === 1}
                   onClick={() =>
-                    setCurrentPage(page)
+                    setCurrentPage((p) => p - 1)
                   }
-                  className={`px-3 py-1 rounded border text-sm
-                    ${
-                      page === currentPage
-                        ? "bg-indigo-600 text-white border-indigo-600"
-                        : "hover:bg-gray-100"
-                    }`}
+                  className="p-2 rounded-lg border disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 transition"
                 >
-                  {page}
+                  <ChevronLeft size={18} />
                 </button>
-              ))}
 
-              {/* Next */}
-              <button
-                disabled={
-                  currentPage === totalPages
-                }
-                onClick={() =>
-                  setCurrentPage((p) => p + 1)
-                }
-                className="p-2 rounded border disabled:opacity-40 hover:bg-gray-100"
-              >
-                <ChevronRight size={18} />
-              </button>
+                {/* Pages */}
+                {Array.from(
+                  { length: totalPages },
+                  (_, i) => i + 1,
+                ).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() =>
+                      setCurrentPage(page)
+                    }
+                    className={`px-3 py-1 rounded-lg border text-sm font-medium transition
+                      ${
+                        page === currentPage
+                          ? "bg-indigo-600 text-white border-indigo-600"
+                          : "hover:bg-gray-100"
+                      }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                {/* Next */}
+                <button
+                  disabled={
+                    currentPage === totalPages
+                  }
+                  onClick={() =>
+                    setCurrentPage((p) => p + 1)
+                  }
+                  className="p-2 rounded-lg border disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 transition"
+                >
+                  <ChevronRight size={18} />
+                </button>
+
+              </div>
 
             </div>
+          )}
 
-          </div>
-        )}
-
+        </div>
       </div>
 
       {/* Delete Modal */}

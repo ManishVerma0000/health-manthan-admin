@@ -42,7 +42,7 @@ const navItems: NavItem[] = [
   {
     label: "TreatedBy",
     href: "/treated-by/list",
-    icon: <Stethoscope  size={18} />,
+    icon: <Stethoscope size={18} />,
   },
   {
     label: "Surgery",
@@ -119,13 +119,13 @@ export default function Sidebar() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-screen z-50 bg-white  shadow-lg transition-all duration-300
+        className={`fixed top-0 left-0 h-screen z-50 bg-white shadow-lg transition-all duration-300 flex flex-col
         ${open ? "w-64" : "w-20"}
         ${mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
       `}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-4">
+        {/* Header - Fixed at top */}
+        <div className="flex-shrink-0 flex items-center justify-between px-4 py-4 border-b border-gray-200">
           <div className="flex items-center gap-2">
             {open && <GovernmentIcon />}
           </div>
@@ -133,7 +133,7 @@ export default function Sidebar() {
           {/* Collapse Button */}
           <button
             onClick={() => setOpen(!open)}
-            className="hidden md:block bg-gray-100 p-2 rounded-lg hover:bg-gray-200"
+            className="hidden md:block bg-gray-100 p-2 rounded-lg hover:bg-gray-200 transition"
           >
             <ChevronRight
               size={20}
@@ -146,14 +146,14 @@ export default function Sidebar() {
           {/* Mobile Close */}
           <button
             onClick={() => setMobileOpen(false)}
-            className="md:hidden bg-gray-100 p-2 rounded-lg"
+            className="md:hidden bg-gray-100 p-2 rounded-lg hover:bg-gray-200 transition"
           >
             <X size={20} />
           </button>
         </div>
 
-        {/* Menu */}
-        <nav className="p-3 space-y-2">
+        {/* Menu - Scrollable */}
+        <nav className="flex-1 overflow-y-auto p-3 space-y-2">
           {navItems.map((item) => (
             <Link
               key={item.label}
