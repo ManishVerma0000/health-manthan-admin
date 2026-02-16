@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Phone, Mail, MapPin, Star } from "lucide-react";
-import { useParams } from "next/navigation";
+import { Phone, Mail, MapPin, Star, Pencil } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
 
 import Header from "@/components/Header";
 import { getHospitalById } from "@/services/hospital.service";
@@ -67,6 +67,7 @@ const HospitalProfile: React.FC = () => {
   const [doctorLoading, setDoctorLoading] = useState(false);
 
   const params = useParams();
+  const router = useRouter();
   const id = params?.id as string;
 
   /* ================= TABS ================= */
@@ -153,7 +154,11 @@ const HospitalProfile: React.FC = () => {
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <h1 className="text-xl font-semibold">{hospital?.hospitalName}</h1>
 
-          <button className="text-blue-600 text-sm font-medium">
+          <button
+            className="inline-flex items-center gap-2 text-blue-600 text-sm font-medium hover:underline"
+            onClick={() => router.push(`/hospital?id=${id}`)}
+          >
+            <Pencil className="w-4 h-4" />
             Edit Hospital
           </button>
         </div>

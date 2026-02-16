@@ -10,6 +10,7 @@ import {
   ChevronRight,
   Stethoscope,
   Trash2,
+  Pencil,
 } from "lucide-react";
 
 import { getDoctorList, deleteDoctorApi } from "@/services/doctor.service";
@@ -298,7 +299,17 @@ export default function DoctorListPage() {
                         </td>
 
                         {/* Actions */}
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-4 space-x-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/doctor/add?id=${doctor._id}`);
+                            }}
+                            className="inline-flex items-center gap-1 px-3 py-1 text-xs rounded bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
+                          >
+                            <Pencil size={14} />
+                            Edit
+                          </button>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();

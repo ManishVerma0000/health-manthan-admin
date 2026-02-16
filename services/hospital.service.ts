@@ -31,6 +31,11 @@ export const createHospitalApi = async (payload: any) => {
   return response?.data;
 };
 
+export const updateHospitalApi = async (id: string, payload: any) => {
+  const response = await api.put(`/hospital/${id}`, payload);
+  return response?.data;
+};
+
 export const createHospitalCategoryApi = async (hospitalCategory: string) => {
   const res = await api.post("/hospital-category", {
     hospitalCategory,

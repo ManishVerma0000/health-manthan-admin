@@ -332,22 +332,27 @@ export default function HospitalListPage() {
                               {item.location}
                             </td>
 
-                            {/* Actions */}
-                            <td className="px-6 py-4">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setDeleteId(
-                                    item._id,
-                                  );
-                                }}
-                                className="p-2 text-red-600 hover:bg-red-50 rounded"
-                              >
-                                <Trash2
-                                  size={18}
-                                />
-                              </button>
-                            </td>
+                        {/* Actions */}
+                        <td className="px-6 py-4 space-x-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/hospital?id=${item._id}`);
+                            }}
+                            className="px-3 py-1 text-xs rounded bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeleteId(item._id);
+                            }}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </td>
                           </tr>
                         ),
                       )}

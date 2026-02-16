@@ -2,11 +2,15 @@
 import React, { useEffect, useState } from "react";
 import { ChevronLeft, Plus, X, ImageIcon, Upload } from "lucide-react";
 import { uploadImageApi } from "@/services/upload.services";
-import { createSurgeryApi } from "@/services/surgery.service";
+import {
+  createSurgeryApi,
+  getSurgeryById,
+  updateSurgeryApi,
+} from "@/services/surgery.service";
 import Toast from "@/components/Toast";
 import { getCategoriesApi } from "@/services/category.services";
 import { getTreatedByListApi } from "@/services/treatedBy.service";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const extractImageUrl = (res: any): string => {
   return res?.file?.url || "";
@@ -61,7 +65,8 @@ const SurgeryDetailsStep: React.FC<{
   onChange: (data: SurgeryDetails) => void;
   onNext: () => void;
   onBack: () => void;
-}> = ({ data, onChange, onNext, onBack }) => {
+  isEditMode?: boolean;
+}> = ({ data, onChange, onNext, onBack, isEditMode = false }) => {
   const [errors, setErrors] = useState<Partial<Record<keyof SurgeryDetails, string>>>({});
 
   const handleInputChange = (field: keyof SurgeryDetails, value: string) => {
@@ -210,7 +215,9 @@ const SurgeryDetailsStep: React.FC<{
       <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-sm">
         {/* Header */}
         <div className="flex items-center justify-between p-6 ">
-          <h1 className="text-xl font-semibold">Add New Surgery</h1>
+          <h1 className="text-xl font-semibold">
+            {isEditMode ? "Edit Surgery" : "Add New Surgery"}
+          </h1>
           <div className="flex gap-3">
             <button
               onClick={onBack}
@@ -518,7 +525,8 @@ const SurgeryInformationStep: React.FC<{
   onChange: (data: SurgeryInformation) => void;
   onBack: () => void;
   onSubmit: () => void;
-}> = ({ surgeryDetails, data, onChange, onBack, onSubmit }) => {
+  isEditMode?: boolean;
+}> = ({ surgeryDetails, data, onChange, onBack, onSubmit, isEditMode = false }) => {
   const [errors, setErrors] = useState<{
     symptoms?: Record<number, { subcategory?: string }>;
     procedureTimeline?: Record<number, { step?: string }>;
@@ -1154,7 +1162,12 @@ const SurgeryInformationStep: React.FC<{
 
 // Main App Component
 const App: React.FC = () => {
-  const router=useRouter()
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const editId = searchParams.get("id");
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const [currentStep, setCurrentStep] = useState(1);
   const [surgeryDetails, setSurgeryDetails] = useState<SurgeryDetails>({
     surgeryName: "",
@@ -1180,13 +1193,80 @@ const App: React.FC = () => {
       images: [],
       procedureTimeline: [
         { step: "", typeProcedure: "", duration: "", medication: "" },
-      ],  
+      ],
       benefits: [""],
       risks: [""],
       recoveryTimeline: [{ stage: "", mention: "", lightCare: "" }],
       faqs: [{ question: "", answer: "" }],
       paragraph: "",
     });
+
+  /* ================= LOAD SURGERY FOR EDIT ================= */
+  useEffect(() => {
+    const loadSurgeryForEdit = async () => {
+      if (!editId) return;
+
+      try {
+        setLoading(true);
+        const res = await getSurgeryById(editId);
+        const surgery = res?.data;
+
+        if (!surgery) return;
+
+        // Set surgery details
+        setSurgeryDetails({
+          surgeryName: surgery.surgeryName || "",
+          diseaseNeme: surgery.diseaseNeme || "",
+          recoveryTime: surgery.recoveryTime || "",
+          icon: surgery.icon || null,
+          image: surgery.image || null,
+          surgeryCategory: surgery.surgeryCategory?._id || surgery.surgeryCategory || "",
+          duration: surgery.duration || "",
+          treatedBy: surgery.treatedBy?._id || surgery.treatedBy || "",
+          costingRange: surgery.costingRange || "",
+          paragraph: surgery.paragraph || "",
+        });
+
+        // Set surgery information
+        setSurgeryInformation({
+          symptoms:
+            surgery.symptoms && surgery.symptoms.length > 0
+              ? surgery.symptoms
+              : [{ subcategory: "", paragraph: "" }],
+          images: surgery.images || [],
+          procedureTimeline:
+            surgery.procedureTimeline && surgery.procedureTimeline.length > 0
+              ? surgery.procedureTimeline
+              : [{ step: "", typeProcedure: "", duration: "", medication: "" }],
+          benefits: surgery.benefits && surgery.benefits.length > 0 ? surgery.benefits : [""],
+          risks: surgery.risks && surgery.risks.length > 0 ? surgery.risks : [""],
+          recoveryTimeline:
+            surgery.recoveryTimeline && surgery.recoveryTimeline.length > 0
+              ? surgery.recoveryTimeline
+              : [{ stage: "", mention: "", lightCare: "" }],
+          faqs:
+            surgery.faqs && surgery.faqs.length > 0
+              ? surgery.faqs
+              : [{ question: "", answer: "" }],
+          paragraph: surgery.paragraph || "",
+        });
+
+        setIsEditMode(true);
+      } catch (error) {
+        console.error("Failed to load surgery for edit:", error);
+        setToast({
+          show: true,
+          message: "Failed to load surgery details",
+          type: "error",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSurgeryForEdit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editId]);
 
   const handleNext = () => {
     setCurrentStep(2);
@@ -1218,24 +1298,35 @@ const App: React.FC = () => {
         images: surgeryInformation.images.filter(Boolean),
       };
       console.log("FINAL PAYLOAD 👉", payload);
-      const response = await createSurgeryApi(payload);
+
+      const response =
+        isEditMode && editId
+          ? await updateSurgeryApi(editId, payload)
+          : await createSurgeryApi(payload);
+
       console.log(response, "response");
-      // alert("Surgery created successfully");
+
       setToast({
         show: true,
-        message: "Surgery created successfully",
+        message: isEditMode
+          ? "Surgery updated successfully"
+          : "Surgery created successfully",
         type: "success",
       });
 
       setTimeout(() => {
-          router.push('/surgery/list')
+        router.push("/surgery/list");
       }, 100);
     } catch (error) {
-      console.error("Create surgery failed", error);
-      // alert("Something went wrong");
+      console.error(
+        isEditMode ? "Update surgery failed" : "Create surgery failed",
+        error
+      );
       setToast({
         show: true,
-        message: "Login failed",
+        message: isEditMode
+          ? "Failed to update surgery"
+          : "Failed to create surgery",
         type: "error",
       });
     }
@@ -1255,6 +1346,7 @@ const App: React.FC = () => {
           onChange={setSurgeryDetails}
           onNext={handleNext}
           onBack={handleBack}
+          isEditMode={isEditMode}
         />
       ) : (
         <SurgeryInformationStep
@@ -1263,6 +1355,7 @@ const App: React.FC = () => {
           onChange={setSurgeryInformation}
           onBack={handleBack}
           onSubmit={handleSubmit}
+          isEditMode={isEditMode}
         />
       )}
     </>

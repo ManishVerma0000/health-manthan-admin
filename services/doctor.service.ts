@@ -10,6 +10,11 @@ export const createDoctorApi = async (payload: any) => {
   return response?.data;
 };
 
+export const updateDoctorApi = async (id: string, payload: any) => {
+  const response = await api.put(`/doctor/${id}`, payload);
+  return response?.data;
+};
+
 export const deleteDoctorApi = (id: string) => {
   return api.delete(`/doctor/${id}`);
 };

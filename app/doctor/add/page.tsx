@@ -2,10 +2,15 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Image as ImageIcon } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { getHospitalList } from "@/services/hospital.service";
 import { uploadImageApi } from "@/services/upload.services";
-import { createDoctorApi } from "@/services/doctor.service";
+import {
+  createDoctorApi,
+  getDoctorById,
+  updateDoctorApi,
+} from "@/services/doctor.service";
 import Header from "@/components/Header";
 
 export default function AddDoctorPage() {
@@ -40,6 +45,11 @@ export default function AddDoctorPage() {
   });
 
   const [errors, setErrors] = useState<any>({});
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const editId = searchParams.get("id");
+  const [isEditMode, setIsEditMode] = useState(false);
 
   /* ================= HELPERS ================= */
 
@@ -83,6 +93,60 @@ export default function AddDoctorPage() {
   useEffect(() => {
     fetchHospitals();
   }, []);
+
+  /* ================= PREFILL WHEN EDITING ================= */
+
+  useEffect(() => {
+    const loadDoctorForEdit = async () => {
+      if (!editId) return;
+
+      try {
+        setLoading(true);
+        const res = await getDoctorById(editId);
+        const doctor = res?.data;
+        if (!doctor) return;
+
+        setForm({
+          hospital: doctor.hospital?._id || doctor.hospital || "",
+          name: doctor.name || "",
+          contactNumber: doctor.contactNumber || "",
+          whatsAppNumber: doctor.whatsAppNumber || "",
+          workingFrom: doctor.workingFrom
+            ? new Date(doctor.workingFrom).toISOString().slice(0, 10)
+            : "",
+          qualificationAndExperience:
+            doctor.qualificationAndExperience || "",
+          about: doctor.about || "",
+          status: doctor.status ?? true,
+        });
+
+        setTreatments(
+          Array.isArray(doctor.treatmentProvide)
+            ? doctor.treatmentProvide.join(", ")
+            : doctor.treatmentProvide || ""
+        );
+
+        setTimings(doctor.timings || []);
+
+        setImageUrl(
+          Array.isArray(doctor.imageUrl)
+            ? doctor.imageUrl[0] || ""
+            : doctor.imageUrl || ""
+        );
+
+        setIsActive(doctor.status ?? true);
+        setIsEditMode(true);
+      } catch (error) {
+        console.error("Failed to load doctor for edit:", error);
+        showToast("Failed to load doctor details", "error");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDoctorForEdit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editId]);
 
   const fetchHospitals = async () => {
     try {
@@ -178,12 +242,27 @@ export default function AddDoctorPage() {
       status: isActive,
     };
     try {
-      const res = await createDoctorApi(payload);
+      const res =
+        isEditMode && editId
+          ? await updateDoctorApi(editId, payload)
+          : await createDoctorApi(payload);
       if (!res?.success) throw new Error("Failed");
-      showToast("Doctor created successfully 🎉", "success");
+      showToast(
+        isEditMode
+          ? "Doctor updated successfully 🎉"
+          : "Doctor created successfully 🎉",
+        "success"
+      );
+
+      if (isEditMode) {
+        router.push("/doctor/list");
+      }
     } catch (err) {
       console.error(err);
-      showToast("Error creating doctor", "error");
+      showToast(
+        isEditMode ? "Error updating doctor" : "Error creating doctor",
+        "error"
+      );
     }
   };
   const [toast, setToast] = useState<{

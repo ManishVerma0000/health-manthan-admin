@@ -148,10 +148,15 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import HospitalDetailsStep from "@/components/HospitalButton";
 import HospitalInformationStep from "@/components/HospitalInformation";
-import { createHospitalApi } from "@/services/hospital.service";
+import {
+  createHospitalApi,
+  getHospitalById,
+  updateHospitalApi,
+} from "@/services/hospital.service";
 import Header from "@/components/Header";
 import Toast from "@/components/Toast";
 
@@ -223,6 +228,11 @@ export default function HospitalCreatePage() {
 
   const [loading, setLoading] = useState<boolean>(false);
 
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const editId = searchParams.get("id");
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
+
   /* ---------- TOAST STATE ---------- */
 
   const [toast, setToast] = useState({
@@ -241,6 +251,67 @@ export default function HospitalCreatePage() {
       type,
     });
   };
+
+  /* ---------- PREFILL FOR EDIT ---------- */
+
+  useEffect(() => {
+    const loadHospitalForEdit = async () => {
+      if (!editId) return;
+
+      try {
+        setLoading(true);
+        const res = await getHospitalById(editId);
+        const hospital = res?.data;
+
+        if (!hospital) return;
+
+        setFormData((prev) => ({
+          ...prev,
+          hospitalName: hospital.hospitalName || "",
+          hospitalType:
+            hospital.hospitalType?._id || hospital.hospitalType || "",
+          contactNumber: hospital.contactNumber || "",
+          whatsapp: hospital.whatsapp || "",
+          email: hospital.email || "",
+          city: hospital.city || "",
+          mapDirection: hospital.mapDirection || "",
+          location: hospital.location || "",
+          icon: null,
+          images: [],
+          iconUrl: hospital.iconUrl || undefined,
+          firstStepImageUrls: hospital.firstStepImageUrls || [],
+          imageUrls: hospital.imageUrls || [],
+          timings:
+            hospital.timings && hospital.timings.length > 0
+              ? hospital.timings
+              : [{ days: "", time: "" }],
+          treatmentList: (hospital.treatmentList || []).map(
+            (item: any) => item?._id || item
+          ),
+          cashlessList: (hospital.cashlessList || []).map(
+            (item: any) => item?._id || item
+          ),
+          panelList: (hospital.panelList || []).map(
+            (item: any) => item?._id || item
+          ),
+          hospitaldetails: hospital.hospitaldetails || "",
+        }));
+
+        setIsEditMode(true);
+      } catch (error) {
+        console.error("Error loading hospital for edit:", error);
+        showToast(
+          "Failed to load hospital details for editing",
+          "error"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadHospitalForEdit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editId]);
 
   /* ---------- UPDATE FORM ---------- */
 
@@ -273,24 +344,47 @@ export default function HospitalCreatePage() {
         hospitaldetails: formData.hospitaldetails,
       };
 
-      const result = await createHospitalApi(payload);
+      const result = isEditMode && editId
+        ? await updateHospitalApi(editId, payload)
+        : await createHospitalApi(payload);
 
       if (!result?.success) {
-        throw new Error(result?.message || "Hospital creation failed");
+        throw new Error(
+          result?.message ||
+            (isEditMode ? "Hospital update failed" : "Hospital creation failed")
+        );
       }
 
-      console.log("✅ Hospital created:", result?.data);
-
-      showToast("Hospital created successfully 🎉", "success");
-
-      setFormData(initialFormState);
-      setStep(1);
-
-    } catch (error: any) {
-      console.error("❌ Error creating hospital:", error);
+      console.log(
+        isEditMode ? "✅ Hospital updated:" : "✅ Hospital created:",
+        result?.data
+      );
 
       showToast(
-        error?.message || "Something went wrong while creating hospital",
+        isEditMode
+          ? "Hospital updated successfully 🎉"
+          : "Hospital created successfully 🎉",
+        "success"
+      );
+
+      if (isEditMode) {
+        router.push("/hospital/list");
+      } else {
+        setFormData(initialFormState);
+        setStep(1);
+      }
+
+    } catch (error: any) {
+      console.error(
+        isEditMode ? "❌ Error updating hospital:" : "❌ Error creating hospital:",
+        error
+      );
+
+      showToast(
+        error?.message ||
+          (isEditMode
+            ? "Something went wrong while updating hospital"
+            : "Something went wrong while creating hospital"),
         "error",
       );
     } finally {

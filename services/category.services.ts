@@ -37,3 +37,16 @@ export const createCategoryApi = async (payload: {
 export const deleteCategoryApi = (id: string) => {
   return api.delete(`/categories/${id}`);
 };
+
+export const updateCategoryApi = async (
+  id: string,
+  payload: Partial<{
+    categoryName: string;
+    status: boolean;
+    imageUrl: string;
+    iconImage: string;
+  }>
+) => {
+  const response: any = await api.put(`/categories/${id}`, payload);
+  return response?.data;
+};

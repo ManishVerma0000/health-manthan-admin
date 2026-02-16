@@ -5,6 +5,11 @@ export const createSurgeryApi = async (payload: any) => {
   return response?.data;
 };
 
+export const updateSurgeryApi = async (id: string, payload: any) => {
+  const response = await api.put(`/surgery/${id}`, payload);
+  return response?.data;
+};
+
 export const getSurgeryListApi = async () => {
   const res = await api.get(`/surgery/list`);
   return res?.data;

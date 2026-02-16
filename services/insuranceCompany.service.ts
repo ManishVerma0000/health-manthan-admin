@@ -22,3 +22,13 @@ export const createInsuranceCompanyApi = async (
   });
   return res?.data;
 };
+
+export const updateInsuranceCompanyApi = async (
+  id: string,
+  insuranceCompany: string
+) => {
+  const res = await api.put(`/insurance-company/${id}`, {
+    insuranceCompany,
+  });
+  return res?.data;
+};

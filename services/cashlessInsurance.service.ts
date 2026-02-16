@@ -21,3 +21,16 @@ export const deleteCashlessInsuranceApi = async (id: string) => {
   const response = await api.delete(`/cashless-insurance-company/${id}`);
   return response?.data;
 };
+
+export const updateCashlessInsuranceApi = async (
+  id: string,
+  payload: {
+    cashlessInsuranceCompany: string;
+  }
+) => {
+  const response = await api.put(
+    `/cashless-insurance-company/${id}`,
+    payload
+  );
+  return response?.data;
+};

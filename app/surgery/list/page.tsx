@@ -309,6 +309,16 @@ export default function SurgeryPage() {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
+                                router.push(`/surgery/add?id=${item.id}`);
+                              }}
+                              className="inline-flex items-center gap-1 px-3 py-1 text-xs rounded bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
+                            >
+                              <Pencil size={14} />
+                              Edit
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 setDeleteId(item.id);
                               }}
                               className="p-2 text-red-600 hover:bg-red-50 rounded transition"

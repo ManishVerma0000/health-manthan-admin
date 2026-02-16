@@ -19,3 +19,14 @@ export const deleteTreatedByApi = async (id: string) => {
   const response: any = await api.delete(`/treated-by/${id}`);
   return response?.data;
 };
+
+/* Update */
+export const updateTreatedByApi = async (
+  id: string,
+  data: {
+    treatedByName: string;
+  }
+) => {
+  const response: any = await api.put(`/treated-by/${id}`, data);
+  return response?.data;
+};
