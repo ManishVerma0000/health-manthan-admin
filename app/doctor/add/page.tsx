@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { Image as ImageIcon } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -13,7 +13,7 @@ import {
 } from "@/services/doctor.service";
 import Header from "@/components/Header";
 
-export default function AddDoctorPage() {
+function AddDoctorPage() {
   /* ================= STATES ================= */
 
   const [treatments, setTreatments] = useState("");
@@ -615,5 +615,14 @@ export default function AddDoctorPage() {
         </div>
       )}
     </div>
+  );
+}
+
+
+export default function Page() {  // ← add this at the bottom
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AddDoctorPage />
+    </Suspense>
   );
 }

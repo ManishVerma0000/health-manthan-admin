@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { ChevronLeft, Plus, X, ImageIcon, Upload } from "lucide-react";
 import { uploadImageApi } from "@/services/upload.services";
 import {
@@ -1334,6 +1334,7 @@ const App: React.FC = () => {
 
   return (
     <>
+
       <Toast
         show={toast.show}
         message={toast.message}
@@ -1362,4 +1363,13 @@ const App: React.FC = () => {
   );
 };
 
-export default App;
+// export default App;
+
+
+export default function Page() {  // ← add at bottom
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <App />
+    </Suspense>
+  );
+}
