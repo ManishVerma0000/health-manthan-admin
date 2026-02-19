@@ -7,6 +7,7 @@ import { getDoctorList } from "@/services/doctor.service";
 import { getSurgeryListApi } from "@/services/surgery.service";
 import { getContactListApi } from "@/services/contact.service";
 import { getBookAppointmentListApi } from "@/services/bookAppointment.service";
+import Header from "@/components/Header";
 
 export default function DashboardPage() {
     const [stats, setStats] = useState({
@@ -15,6 +16,7 @@ export default function DashboardPage() {
         surgeries: 0,
         contacts: 0,
     });
+    const [search, setSearch] = useState('')
     const [recentAppointments, setRecentAppointments] = useState<any[]>([]);
     const [recentContacts, setRecentContacts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -65,7 +67,11 @@ export default function DashboardPage() {
     }
 
     return (
-        <div className="p-8 space-y-8">
+        <div className="p-2 space-y-8">
+            <Header
+                searchValue={search}
+                onSearchChange={(value) => setSearch(value)}
+            />
             <div>
                 <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
                 <p className="text-muted-foreground">Overview of your system's performance.</p>
