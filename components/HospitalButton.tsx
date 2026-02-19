@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Upload, ImageIcon } from "lucide-react";
+import { Upload, ImageIcon, Plus, Trash2 } from "lucide-react";
 import { fetchHospitalCategoriesApi } from "@/services/hospital.service";
 import { uploadImageApi } from "@/services/category.services";
+import Input from "@/components/Input";
+import Button from "@/components/Button";
 
 type HospitalCategory = {
   _id: string;
@@ -46,13 +48,8 @@ export default function HospitalDetailsStep({
   const validate = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!data?.hospitalName?.trim()) {
-      newErrors.hospitalName = "Hospital name is required";
-    }
-
-    if (!data?.hospitalType) {
-      newErrors.hospitalType = "Please select hospital type";
-    }
+    if (!data?.hospitalName?.trim()) newErrors.hospitalName = "Hospital name is required";
+    if (!data?.hospitalType) newErrors.hospitalType = "Please select hospital type";
 
     if (!data?.contactNumber?.trim()) {
       newErrors.contactNumber = "Contact number is required";
@@ -60,9 +57,7 @@ export default function HospitalDetailsStep({
       newErrors.contactNumber = "Enter valid 10 digit number";
     }
 
-    if (!data?.whatsapp?.trim()) {
-      newErrors.whatsapp = "Whatsapp number is required";
-    }
+    if (!data?.whatsapp?.trim()) newErrors.whatsapp = "Whatsapp number is required";
 
     if (!data?.email?.trim()) {
       newErrors.email = "Email is required";
@@ -70,20 +65,11 @@ export default function HospitalDetailsStep({
       newErrors.email = "Invalid email format";
     }
 
-    if (!data?.iconUrl) {
-      newErrors.iconUrl = "Icon is required";
-    }
-
-    if (!data?.city?.trim()) {
-      newErrors.city = "City is required";
-    }
-
-    if (!data?.location?.trim()) {
-      newErrors.location = "Location is required";
-    }
+    if (!data?.iconUrl) newErrors.iconUrl = "Icon is required";
+    if (!data?.city?.trim()) newErrors.city = "City is required";
+    if (!data?.location?.trim()) newErrors.location = "Location is required";
 
     setErrors(newErrors);
-
     return Object.keys(newErrors).length === 0;
   };
 
@@ -103,12 +89,9 @@ export default function HospitalDetailsStep({
 
   const handleIconUpload = async (file?: File) => {
     if (!file) return;
-
     const url = await uploadImage(file);
-
     if (url) {
       onChange({ iconUrl: url });
-
       setErrors((prev) => {
         const copy = { ...prev };
         delete copy.iconUrl;
@@ -120,8 +103,6 @@ export default function HospitalDetailsStep({
   const uploadMultipleImages = async (files: File[]) => {
     try {
       setUploading(true);
-      
-      // Upload all files first and collect URLs
       const uploadPromises = files.map(async (file) => {
         try {
           const res = await uploadImageApi(file);
@@ -135,7 +116,6 @@ export default function HospitalDetailsStep({
       const uploadedUrls = await Promise.all(uploadPromises);
       const validUrls = uploadedUrls.filter((url): url is string => Boolean(url));
 
-      // Update state once with all new URLs
       if (validUrls.length > 0) {
         const currentUrls = data.firstStepImageUrls || [];
         const newUrls = [...currentUrls, ...validUrls].slice(0, 10);
@@ -157,16 +137,12 @@ export default function HospitalDetailsStep({
 
   const handleBrowse = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
-
     const files = Array.from(e.target.files).slice(0, 10);
     await uploadMultipleImages(files);
   };
 
   /* ---------------- TIMING ---------------- */
-  const timings: Timing[] =
-    data?.timings && data?.timings.length > 0
-      ? data?.timings
-      : [{ days: "", time: "" }];
+  const timings: Timing[] = data?.timings && data?.timings.length > 0 ? data?.timings : [{ days: "", time: "" }];
 
   const updateTiming = (index: number, key: keyof Timing, value: string) => {
     const updated = [...timings];
@@ -186,31 +162,22 @@ export default function HospitalDetailsStep({
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
+    <div className="p-6 max-w-7xl mx-auto space-y-8">
       {/* ---------------- BASIC DETAILS ---------------- */}
-      <div className="grid grid-cols-3 gap-6">
-        <div className="col-span-2 grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Input
+            label="Hospital Name *"
+            value={data?.hospitalName || ""}
+            onChange={(e) => onChange({ hospitalName: e.target.value })}
+            error={errors.hospitalName}
+            placeholder="Enter hospital name"
+          />
 
-          {/* Hospital Name */}
-          <div>
-            <label className="block text-sm mb-1">Hospital Name *</label>
-            <input
-              className="w-full border px-3 py-2 rounded-md"
-              value={data?.hospitalName || ""}
-              onChange={(e) => onChange({ hospitalName: e.target.value })}
-            />
-            {errors.hospitalName && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.hospitalName}
-              </p>
-            )}
-          </div>
-
-          {/* Hospital Type */}
-          <div>
-            <label className="block text-sm mb-1">Hospital Type *</label>
+          <div className="space-y-2">
+            <label className="text-sm font-medium leading-none">Hospital Type *</label>
             <select
-              className="w-full border px-3 py-2 rounded-md"
+              className={`flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring ${errors.hospitalType ? "border-destructive" : ""}`}
               value={data?.hospitalType || ""}
               onChange={(e) => onChange({ hospitalType: e.target.value })}
             >
@@ -221,108 +188,75 @@ export default function HospitalDetailsStep({
                 </option>
               ))}
             </select>
-
-            {errors.hospitalType && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.hospitalType}
-              </p>
-            )}
+            {errors.hospitalType && <p className="text-xs font-medium text-destructive">{errors.hospitalType}</p>}
           </div>
 
-          {/* Contact */}
-          <div>
-            <label className="block text-sm mb-1">Contact Number *</label>
-            <input
-              className="w-full border px-3 py-2 rounded-md"
-              value={data?.contactNumber || ""}
-              onChange={(e) => onChange({ contactNumber: e.target.value })}
-            />
-            {errors.contactNumber && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.contactNumber}
-              </p>
-            )}
-          </div>
+          <Input
+            label="Contact Number *"
+            value={data?.contactNumber || ""}
+            onChange={(e) => onChange({ contactNumber: e.target.value })}
+            error={errors.contactNumber}
+            placeholder="Enter contact number"
+          />
 
-          {/* Whatsapp */}
-          <div>
-            <label className="block text-sm mb-1">Whatsapp *</label>
-            <input
-              className="w-full border px-3 py-2 rounded-md"
-              value={data?.whatsapp || ""}
-              onChange={(e) => onChange({ whatsapp: e.target.value })}
-            />
-            {errors.whatsapp && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.whatsapp}
-              </p>
-            )}
-          </div>
+          <Input
+            label="Whatsapp *"
+            value={data?.whatsapp || ""}
+            onChange={(e) => onChange({ whatsapp: e.target.value })}
+            error={errors.whatsapp}
+            placeholder="Enter whatsapp number"
+          />
 
-          {/* Email */}
-          <div>
-            <label className="block text-sm mb-1">Mail ID *</label>
-            <input
-              className="w-full border px-3 py-2 rounded-md"
-              value={data?.email || ""}
-              onChange={(e) => onChange({ email: e.target.value })}
-            />
-            {errors.email && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.email}
-              </p>
-            )}
-          </div>
+          <Input
+            label="Mail ID *"
+            value={data?.email || ""}
+            onChange={(e) => onChange({ email: e.target.value })}
+            error={errors.email}
+            placeholder="Enter email address"
+          />
 
-          {/* Icon */}
-          <div>
-            <label className="block text-sm mb-1">Icon *</label>
-
-            <label className="flex items-center gap-2 cursor-pointer border px-4 py-2 rounded-md w-max">
-              <Upload size={16} />
-              Upload Icon
-
-              <input
-                type="file"
-                className="hidden"
-                accept="image/*"
-                onChange={(e) => handleIconUpload(e.target.files?.[0])}
-              />
-            </label>
-
-            {data?.iconUrl && (
-              <div className="mt-2">
+          {/* Icon Upload */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium leading-none">Icon *</label>
+            <div className="flex items-center gap-4">
+              <label className="flex items-center gap-2 cursor-pointer border border-input bg-card hover:bg-accent hover:text-accent-foreground px-4 py-2 rounded-md transition-colors text-sm font-medium shadow-sm">
+                <Upload size={16} />
+                Upload Icon
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={(e) => handleIconUpload(e.target.files?.[0])}
+                />
+              </label>
+              {data?.iconUrl && (
                 <img
                   src={data.iconUrl}
                   alt="Icon preview"
-                  className="w-20 h-20 object-cover rounded-md border"
+                  className="w-10 h-10 object-cover rounded-md border border-border"
                 />
-              </div>
-            )}
-
-            {errors.iconUrl && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.iconUrl}
-              </p>
-            )}
+              )}
+            </div>
+            {errors.iconUrl && <p className="text-xs font-medium text-destructive">{errors.iconUrl}</p>}
           </div>
         </div>
 
-        {/* Images */}
-        <div>
-          <label className="block text-sm mb-2">Images</label>
+        {/* Images Upload Area */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium leading-none">Images</label>
           <div
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleDrop}
-            className="border-2 border-dashed rounded-lg flex flex-col items-center justify-center text-center px-4 py-6 min-h-[200px]"
+            className="border-2 border-dashed border-muted-foreground/25 hover:border-muted-foreground/50 rounded-lg flex flex-col items-center justify-center text-center px-4 py-8 bg-muted/5 transition-colors"
           >
-            <ImageIcon size={40} className="text-gray-500 mb-3" />
+            <ImageIcon size={32} className="text-muted-foreground mb-3" />
+            <p className="text-sm font-medium">Drag images here</p>
+            <p className="text-xs text-muted-foreground mb-3">or click to browse</p>
 
-            <p className="text-sm">Drag Images here or</p>
-
-            <label className="text-blue-600 cursor-pointer underline">
-              Browse Images
+            <label className="cursor-pointer">
+              <Button type="button" variant="outline" size="sm" onClick={() => document.getElementById('image-upload')?.click()}>Browse Files</Button>
               <input
+                id="image-upload"
                 type="file"
                 multiple
                 accept="image/*"
@@ -330,171 +264,154 @@ export default function HospitalDetailsStep({
                 onChange={handleBrowse}
               />
             </label>
-
-            <p className="text-xs text-gray-500 mt-2">Max 10 images</p>
+            <p className="text-xs text-muted-foreground mt-2">Max 10 images</p>
           </div>
 
           {/* Image Previews */}
           {data?.firstStepImageUrls && data.firstStepImageUrls.length > 0 && (
-            <div className="mt-4">
-              <div className="grid grid-cols-3 gap-2">
-                {data.firstStepImageUrls.map((url: string, index: number) => (
-                  <div key={index} className="relative group">
-                    <img
-                      src={url}
-                      alt={`Preview ${index + 1}`}
-                      className="w-full h-24 object-cover rounded-md border"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const updated = [...(data.firstStepImageUrls || [])];
-                        updated.splice(index, 1);
-                        onChange({ firstStepImageUrls: updated });
-                      }}
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-              </div>
+            <div className="grid grid-cols-3 gap-2 mt-4">
+              {data.firstStepImageUrls.map((url: string, index: number) => (
+                <div key={index} className="relative group aspect-square">
+                  <img
+                    src={url}
+                    alt={`Preview ${index + 1}`}
+                    className="w-full h-full object-cover rounded-md border border-border"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const updated = [...(data.firstStepImageUrls || [])];
+                      updated.splice(index, 1);
+                      onChange({ firstStepImageUrls: updated });
+                    }}
+                    className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              ))}
             </div>
           )}
         </div>
       </div>
 
-      {/* Address */}
-      <h2 className="text-lg font-semibold mt-10 mb-4">Address</h2>
-
-      <div className="grid grid-cols-2 gap-6">
-        <div>
-          <input
+      {/* ---------------- ADDRESS ---------------- */}
+      <div className="space-y-4">
+        <h2 className="text-lg font-semibold tracking-tight">Address</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Input
             placeholder="City"
-            className="border px-3 py-2 rounded-md w-full"
             value={data?.city || ""}
             onChange={(e) => onChange({ city: e.target.value })}
+            error={errors.city}
           />
-
-          {errors.city && (
-            <p className="text-red-500 text-xs mt-1">
-              {errors.city}
-            </p>
-          )}
-        </div>
-
-        <input
-          placeholder="Map Direction"
-          className="border px-3 py-2 rounded-md"
-          value={data?.mapDirection || ""}
-          onChange={(e) => onChange({ mapDirection: e.target.value })}
-        />
-
-        <div className="col-span-2">
-          <input
-            placeholder="Location"
-            className="border px-3 py-2 rounded-md w-full"
-            value={data?.location || ""}
-            onChange={(e) => onChange({ location: e.target.value })}
+          <Input
+            placeholder="Map Direction URL"
+            value={data?.mapDirection || ""}
+            onChange={(e) => onChange({ mapDirection: e.target.value })}
           />
-
-          {errors.location && (
-            <p className="text-red-500 text-xs mt-1">
-              {errors.location}
-            </p>
-          )}
+          <div className="md:col-span-2">
+            <Input
+              placeholder="Full Location Address"
+              value={data?.location || ""}
+              onChange={(e) => onChange({ location: e.target.value })}
+              error={errors.location}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Timing */}
-      <div className="mt-10">
-        <div className="flex justify-between mb-4">
-          <h2 className="text-lg font-semibold">Timing</h2>
-
-          <button
-            type="button"
-            onClick={addTimingRow}
-            className="text-green-600 text-sm font-medium"
-          >
-            + Add Days
-          </button>
+      {/* ---------------- TIMING ---------------- */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold tracking-tight">Timing</h2>
+          <Button type="button" variant="outline" size="sm" onClick={addTimingRow} className="gap-2">
+            <Plus size={16} /> Add Days
+          </Button>
         </div>
 
-        {timings.map((t, i) => {
-          // Parse time if it's in "5AM to 5PM" format
-          const timeParts = t.time ? t.time.split(" to ") : ["", ""];
-          const startTime = timeParts[0] || "";
-          const endTime = timeParts[1] || "";
+        <div className="space-y-3">
+          {timings.map((t, i) => {
+            const timeParts = t.time ? t.time.split(" to ") : ["", ""];
+            const startTime = timeParts[0] || "";
+            const endTime = timeParts[1] || "";
 
-          const handleTimeChange = (start: string, end: string) => {
-            const formattedTime = start && end ? `${start} to ${end}` : start || end;
-            updateTiming(i, "time", formattedTime);
-          };
+            const handleTimeChange = (start: string, end: string) => {
+              const formattedTime = start && end ? `${start} to ${end}` : start || end;
+              updateTiming(i, "time", formattedTime);
+            };
 
-          return (
-            <div key={i} className="grid grid-cols-5 gap-4 mb-3">
-              {/* Day Select */}
-              <select
-                className="border px-3 py-2 rounded-md"
-                value={t.days}
-                onChange={(e) => updateTiming(i, "days", e.target.value)}
-              >
-                <option value="">Select Day</option>
-                <option value="Sunday">Sunday</option>
-                <option value="Monday">Monday</option>
-                <option value="Tuesday">Tuesday</option>
-                <option value="Wednesday">Wednesday</option>
-                <option value="Thursday">Thursday</option>
-                <option value="Friday">Friday</option>
-                <option value="Saturday">Saturday</option>
-              </select>
-
-              {/* Start Time */}
-              <input
-                className="border px-3 py-2 rounded-md"
-                placeholder="5AM"
-                value={startTime}
-                onChange={(e) => handleTimeChange(e.target.value, endTime)}
-              />
-
-              <span className="flex items-center justify-center text-gray-500">to</span>
-
-              {/* End Time */}
-              <input
-                className="border px-3 py-2 rounded-md"
-                placeholder="5PM"
-                value={endTime}
-                onChange={(e) => handleTimeChange(startTime, e.target.value)}
-              />
-
-              {/* Remove Button */}
-              {timings.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const updated = [...timings];
-                    updated.splice(i, 1);
-                    onChange({ timings: updated });
-                  }}
-                  className="text-red-600 text-sm font-medium"
+            return (
+              <div key={i} className="flex flex-col md:flex-row gap-4 items-start md:items-center bg-card p-4 rounded-lg border border-border shadow-sm">
+                <select
+                  className="flex h-9 w-full md:w-48 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  value={t.days}
+                  onChange={(e) => updateTiming(i, "days", e.target.value)}
                 >
-                  Remove
-                </button>
-              )}
-            </div>
-          );
-        })}
+                  <option value="">Select Day</option>
+                  {[
+                    "Sunday",
+                    "Monday",
+                    "Tuesday",
+                    "Wednesday",
+                    "Thursday",
+                    "Friday",
+                    "Saturday",
+                  ].map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </select>
+
+                <div className="flex items-center gap-2 w-full md:w-auto">
+                  <Input
+                    className="w-full md:w-32"
+                    placeholder="9:00 AM"
+                    value={startTime}
+                    onChange={(e) => handleTimeChange(e.target.value, endTime)}
+                  />
+                  <span className="text-muted-foreground text-sm">to</span>
+                  <Input
+                    className="w-full md:w-32"
+                    placeholder="5:00 PM"
+                    value={endTime}
+                    onChange={(e) => handleTimeChange(startTime, e.target.value)}
+                  />
+                </div>
+
+                {timings.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      const updated = [...timings];
+                      updated.splice(i, 1);
+                      onChange({ timings: updated });
+                    }}
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10 ml-auto md:ml-0"
+                  >
+                    <Trash2 size={18} />
+                  </Button>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Next */}
-      <div className="flex justify-end mt-10">
-        <button
-          disabled={uploading}
+      {/* ---------------- NEXT ---------------- */}
+      <div className="flex justify-end pt-4">
+        <Button
           onClick={handleNext}
-          className="bg-green-600 text-white px-8 py-2 rounded-md disabled:opacity-50"
+          isLoading={uploading}
+          disabled={uploading}
+          className="w-full md:w-auto"
+          size="lg"
         >
-          Next →
-        </button>
+          Next Step
+        </Button>
       </div>
     </div>
   );

@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState, DragEvent, ChangeEvent } from "react";
-import { ChevronDown, ImageIcon } from "lucide-react";
+import { ChevronDown, ImageIcon, X, Loader2 } from "lucide-react";
 import { HospitalFormData } from "@/type/hospital";
 import { fetchInsuranceCompaniesApi } from "@/services/insuranceCompany.service";
 import { getCashlessInsuranceListApi } from "@/services/cashlessInsurance.service";
 import { getGovernmentPanelListApi } from "@/services/governmentPanel.service";
 import { uploadImageApi } from "@/services/category.services";
+import Button from "@/components/Button";
 
 /* ---------- TYPES ---------- */
 
@@ -38,17 +39,10 @@ export default function HospitalInformationStep({
   onChange,
   onSubmit,
 }: Props) {
-  const [insuranceCompanies, setInsuranceCompanies] = useState<
-    InsuranceCompany[]
-  >([]);
-  const [cashlessCompanies, setCashlessCompanies] = useState<
-    CashlessCompany[]
-  >([]);
-  const [governmentPanels, setGovernmentPanels] = useState<
-    GovernmentPanel[]
-  >([]);
+  const [insuranceCompanies, setInsuranceCompanies] = useState<InsuranceCompany[]>([]);
+  const [cashlessCompanies, setCashlessCompanies] = useState<CashlessCompany[]>([]);
+  const [governmentPanels, setGovernmentPanels] = useState<GovernmentPanel[]>([]);
   const [uploading, setUploading] = useState<boolean>(false);
-
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   /* ---------- FETCH DROPDOWNS ---------- */
@@ -73,42 +67,22 @@ export default function HospitalInformationStep({
   }, []);
 
   /* ---------- VALIDATION ---------- */
-
   const validate = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!data?.treatmentList?.length) {
-      newErrors.treatmentList = "Select at least one insurance company";
-    }
-
-    if (!data?.cashlessList?.length) {
-      newErrors.cashlessList = "Select at least one cashless company";
-    }
-
-    if (!data?.panelList?.length) {
-      newErrors.panelList = "Select at least one government panel";
-    }
-
-    if (!data?.imageUrls?.length) {
-      newErrors.imageUrls = "Upload at least one hospital image";
-    }
+    if (!data?.treatmentList?.length) newErrors.treatmentList = "Select at least one insurance company";
+    if (!data?.cashlessList?.length) newErrors.cashlessList = "Select at least one cashless company";
+    if (!data?.panelList?.length) newErrors.panelList = "Select at least one government panel";
+    if (!data?.imageUrls?.length) newErrors.imageUrls = "Upload at least one hospital image";
 
     setErrors(newErrors);
-
     return Object.keys(newErrors).length === 0;
   };
 
   /* ---------- HELPERS ---------- */
-
-  const addItem = (
-    key: "treatmentList" | "cashlessList" | "panelList",
-    id: string
-  ) => {
+  const addItem = (key: "treatmentList" | "cashlessList" | "panelList", id: string) => {
     if (!id || data?.[key]?.includes(id)) return;
-
     onChange({ [key]: [...(data?.[key] ?? []), id] });
-
-    // Remove error when fixed
     setErrors((prev) => {
       const copy = { ...prev };
       delete copy[key];
@@ -116,21 +90,16 @@ export default function HospitalInformationStep({
     });
   };
 
-  const removeItem = (
-    key: "treatmentList" | "cashlessList" | "panelList",
-    index: number
-  ) => {
+  const removeItem = (key: "treatmentList" | "cashlessList" | "panelList", index: number) => {
     const updated = [...(data?.[key] ?? [])];
     updated.splice(index, 1);
     onChange({ [key]: updated });
   };
 
   /* ---------- IMAGE UPLOAD ---------- */
-
   const uploadImages = async (files: File[]) => {
     try {
       setUploading(true);
-
       const uploadedUrls = await Promise.all(
         files.map(async (file) => {
           const res = await uploadImageApi(file);
@@ -138,15 +107,9 @@ export default function HospitalInformationStep({
         })
       );
 
-      const validUrls = uploadedUrls.filter(
-        (url): url is string => Boolean(url)
-      );
+      const validUrls = uploadedUrls.filter((url): url is string => Boolean(url));
+      onChange({ imageUrls: [...(data?.imageUrls ?? []), ...validUrls].slice(0, 10) });
 
-      onChange({
-        imageUrls: [...(data?.imageUrls ?? []), ...validUrls].slice(0, 10),
-      });
-
-      // Clear image error
       setErrors((prev) => {
         const copy = { ...prev };
         delete copy.imageUrls;
@@ -160,119 +123,90 @@ export default function HospitalInformationStep({
     }
   };
 
-  /* ---------- SUBMIT ---------- */
-
   const handleSubmit = () => {
-    if (validate()) {
-      onSubmit();
-    }
+    if (validate()) onSubmit();
   };
 
   /* ---------- UI ---------- */
-
   return (
-    <div className="p-8 max-w-6xl mx-auto">
-      <div className="grid grid-cols-3 gap-10">
+    <div className="p-6 max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         {/* LEFT */}
-        <div className="col-span-2 space-y-8">
+        <div className="lg:col-span-2 space-y-8">
 
           {/* Treatment */}
-          <Section title="Treatment Providing">
+          <Section title="Treatment Providing" error={errors.treatmentList}>
             <Select
               label="Insurance Company"
               options={insuranceCompanies}
               getLabel={(i) => i.insuranceCompany}
               onSelect={(id) => addItem("treatmentList", id)}
             />
-
             <Chips
               ids={data?.treatmentList ?? []}
-              getName={(id) =>
-                insuranceCompanies.find((i) => i._id === id)
-                  ?.insuranceCompany || id
-              }
+              getName={(id) => insuranceCompanies.find((i) => i._id === id)?.insuranceCompany || id}
               onRemove={(i) => removeItem("treatmentList", i)}
             />
-
-            {errors.treatmentList && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.treatmentList}
-              </p>
-            )}
           </Section>
 
           {/* Cashless */}
-          <Section title="Cashless Insurance Companies">
+          <Section title="Cashless Insurance Companies" error={errors.cashlessList}>
             <Select
               label="Cashless Insurance"
               options={cashlessCompanies}
               getLabel={(i) => i.cashlessInsuranceCompany}
               onSelect={(id) => addItem("cashlessList", id)}
             />
-
             <Chips
               ids={data?.cashlessList ?? []}
-              getName={(id) =>
-                cashlessCompanies.find((i) => i._id === id)
-                  ?.cashlessInsuranceCompany || id
-              }
+              getName={(id) => cashlessCompanies.find((i) => i._id === id)?.cashlessInsuranceCompany || id}
               onRemove={(i) => removeItem("cashlessList", i)}
             />
-
-            {errors.cashlessList && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.cashlessList}
-              </p>
-            )}
           </Section>
 
           {/* Panel */}
-          <Section title="Government Panel">
+          <Section title="Government Panel" error={errors.panelList}>
             <Select
               label="Panel"
               options={governmentPanels}
               getLabel={(i) => i.panelName}
               onSelect={(id) => addItem("panelList", id)}
             />
-
             <Chips
               ids={data?.panelList ?? []}
-              getName={(id) =>
-                governmentPanels.find((i) => i._id === id)?.panelName || id
-              }
+              getName={(id) => governmentPanels.find((i) => i._id === id)?.panelName || id}
               onRemove={(i) => removeItem("panelList", i)}
             />
-
-            {errors.panelList && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.panelList}
-              </p>
-            )}
           </Section>
 
           {/* Hospital Details */}
-          <Section title="Hospital Details">
+          <div>
+            <h2 className="font-semibold mb-2 text-lg tracking-tight">Hospital Details</h2>
             <textarea
-              className="w-full border px-3 py-2 rounded-md min-h-[100px]"
-              placeholder="Enter hospital details..."
+              className="flex min-h-[120px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              placeholder="Enter detailed hospital information..."
               value={data?.hospitaldetails ?? ""}
               onChange={(e) => onChange({ hospitaldetails: e.target.value })}
             />
-          </Section>
+          </div>
 
           {/* Submit */}
-          <button
-            disabled={uploading}
-            onClick={handleSubmit}
-            className="bg-blue-600 text-white px-8 py-2 rounded disabled:opacity-50"
-          >
-            Submit Hospital
-          </button>
+          <div className="pt-4">
+            <Button
+              onClick={handleSubmit}
+              isLoading={uploading}
+              disabled={uploading}
+              size="lg"
+              className="w-full sm:w-auto"
+            >
+              Submit Hospital
+            </Button>
+          </div>
         </div>
 
         {/* RIGHT — IMAGE UPLOAD */}
-        <div>
-          <h2 className="text-lg font-semibold mb-3">Hospital Images</h2>
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold tracking-tight">Hospital Images</h2>
 
           <div
             onDragOver={(e: DragEvent<HTMLDivElement>) => e.preventDefault()}
@@ -280,16 +214,23 @@ export default function HospitalInformationStep({
               e.preventDefault();
               uploadImages(Array.from(e.dataTransfer.files));
             }}
-            className="border-2 border-dashed rounded-lg p-6 min-h-[200px] flex flex-col items-center justify-center"
+            className="border-2 border-dashed border-muted-foreground/25 hover:border-muted-foreground/50 rounded-lg p-6 min-h-[200px] flex flex-col items-center justify-center bg-muted/5 transition-colors"
           >
-            <ImageIcon className="w-10 h-10 text-gray-500 mb-2" />
+            {uploading ? (
+              <Loader2 className="h-10 w-10 text-primary animate-spin mb-4" />
+            ) : (
+              <ImageIcon className="w-10 h-10 text-muted-foreground mb-4" />
+            )}
 
-            <p className="text-sm">Drag images here or</p>
+            <p className="text-sm font-medium mb-1">Drag images here</p>
+            <p className="text-xs text-muted-foreground mb-4">or click to browse</p>
 
-            <label className="text-blue-600 underline cursor-pointer">
-              Browse Images
-
+            <label className="cursor-pointer">
+              <Button type="button" variant="outline" size="sm" onClick={() => document.getElementById('gallery-upload')?.click()}>
+                Select Files
+              </Button>
               <input
+                id="gallery-upload"
                 type="file"
                 multiple
                 accept="image/*"
@@ -299,22 +240,28 @@ export default function HospitalInformationStep({
                 }
               />
             </label>
-
-            <p className="text-xs text-gray-500 mt-2">Max 10 images</p>
+            <p className="text-xs text-muted-foreground mt-4">Max 10 images</p>
           </div>
 
-          {errors.imageUrls && (
-            <p className="text-red-500 text-xs mt-2">
-              {errors.imageUrls}
-            </p>
-          )}
+          {errors.imageUrls && <p className="text-sm font-medium text-destructive">{errors.imageUrls}</p>}
 
           {data?.imageUrls?.length > 0 && (
-            <div className="mt-3 space-y-1">
-              {data?.imageUrls?.map((url: any, i: number) => (
-                <p key={i} className="text-xs text-green-600 truncate">
-                  {url}
-                </p>
+            <div className="grid grid-cols-2 gap-2 mt-4">
+              {data.imageUrls.map((url: any, i: number) => (
+                <div key={i} className="group relative aspect-video rounded-md overflow-hidden border border-border">
+                  <img src={url} alt={`Hospital image ${i + 1}`} className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const updated = [...(data?.imageUrls ?? [])];
+                      updated.splice(i, 1);
+                      onChange({ imageUrls: updated });
+                    }}
+                    className="absolute top-1 right-1 bg-black/50 hover:bg-destructive text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
               ))}
             </div>
           )}
@@ -329,14 +276,17 @@ export default function HospitalInformationStep({
 function Section({
   title,
   children,
+  error,
 }: {
   title: string;
   children: React.ReactNode;
+  error?: string;
 }) {
   return (
-    <div>
-      <h2 className="font-semibold mb-2">{title}</h2>
+    <div className="space-y-3">
+      <h2 className="font-semibold text-lg tracking-tight">{title}</h2>
       {children}
+      {error && <p className="text-sm font-medium text-destructive">{error}</p>}
     </div>
   );
 }
@@ -353,24 +303,27 @@ function Select<T extends { _id: string }>({
   onSelect: (id: string) => void;
 }) {
   return (
-    <div className="mb-3">
-      <label className="text-sm">{label}</label>
-
+    <div className="space-y-1.5">
+      <label className="text-sm font-medium leading-none">{label}</label>
       <div className="relative">
         <select
-          className="border px-3 py-2 w-full"
-          onChange={(e) => onSelect(e.target.value)}
+          className="flex h-9 w-full appearance-none rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+          onChange={(e) => {
+            if (e.target.value) {
+              onSelect(e.target.value);
+              e.target.value = ""; // Reset after selection to allow re-selecting same if needed logic-wise, though typically not needed for specialized select
+            }
+          }}
+          defaultValue=""
         >
-          <option value="">Select</option>
-
+          <option value="" disabled>Select option...</option>
           {options.map((o) => (
             <option key={o._id} value={o._id}>
               {getLabel(o)}
             </option>
           ))}
         </select>
-
-        <ChevronDown className="absolute right-2 top-3 h-4 w-4" />
+        <ChevronDown className="absolute right-3 top-2.5 h-4 w-4 opacity-50 pointer-events-none" />
       </div>
     </div>
   );
@@ -385,24 +338,24 @@ function Chips({
   getName: (id: string) => string;
   onRemove: (index: number) => void;
 }) {
+  if (ids.length === 0) return null;
+
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-2 pt-2">
       {ids.map((id, i) => (
         <span
-          key={id}
-          className="bg-gray-200 px-3 py-1 rounded-full text-sm"
+          key={`${id}-${i}`}
+          className="inline-flex items-center rounded-full border border-transparent bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground transition-colors hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
         >
           {getName(id)}
-
           <button
-            className="ml-2"
+            className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
             onClick={() => onRemove(i)}
           >
-            ✕
+            <X size={14} className="text-muted-foreground hover:text-foreground" />
           </button>
         </span>
       ))}
     </div>
   );
 }
-  

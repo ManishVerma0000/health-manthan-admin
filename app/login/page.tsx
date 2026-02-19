@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Icon from "@/components/Icon";
 import { loginApi } from "@/services/auth.service";
 import Toast from "@/components/Toast";
+import Input from "@/components/Input";
+import Button from "@/components/Button";
+import Icon from "@/components/Icon"; // Assuming this is the logo
 
-export default function loginPage() {
+export default function LoginPage() {
   const router = useRouter();
 
   const [form, setForm] = useState({
@@ -20,7 +22,6 @@ export default function loginPage() {
   });
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -28,27 +29,27 @@ export default function loginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
 
     try {
-      const res = await loginApi(form);
-      console.log(res, "res");
+      await loginApi(form);
       setToast({
         show: true,
         message: "Login successful",
         type: "success",
       });
 
-      router.push("/dashboard");
+      // Allow toast to show briefly before redirect
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 500);
+
     } catch (err: any) {
       setToast({
         show: true,
         message: err?.response?.data?.message || err?.message || "Login failed",
         type: "error",
       });
-
-      setError(err?.response?.data?.message || err?.message || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -63,65 +64,76 @@ export default function loginPage() {
         onClose={() => setToast({ ...toast, show: false })}
       />
 
-      <div className="min-h-screen flex flex-col items-center justify-center py-6 px-4">
-        <div className="max-w-[480px] w-full">
-          <Icon />
-
-          <div className="p-6 sm:p-8 rounded-2xl bg-white border border-gray-200 shadow-sm">
-            <h1 className="text-slate-900 text-center text-3xl font-semibold">
-              Sign in
-            </h1>
-
-            {/* 🔥 ONLY CHANGE: onSubmit */}
-            <form className="mt-12 space-y-6" onSubmit={handleLogin}>
-              {error && (
-                <p className="text-red-600 text-sm text-center">{error}</p>
-              )}
-
-              <div>
-                <label className="text-slate-900 text-sm font-medium mb-2 block">
-                  User name
-                </label>
-                <div className="relative flex items-center">
-                  <input
-                    name="username"
-                    type="text"
-                    required
-                    value={form.username}
-                    onChange={handleChange}
-                    className="w-full text-slate-900 text-sm border border-slate-300 px-4 py-3 pr-8 rounded-md outline-blue-600"
-                    placeholder="Enter user name"
-                  />
-                </div>
+      <div className="min-h-screen grid lg:grid-cols-2">
+        {/* Left Side - Form */}
+        <div className="flex items-center justify-center p-8 bg-background">
+          <div className="w-full max-w-md space-y-8">
+            <div className="text-center flex flex-col items-center">
+              <div className="h-12 w-12 bg-primary rounded-lg flex items-center justify-center text-primary-foreground mb-4">
+                {/* Replaced Icon with something consistent if needed, or keeping Icon */}
+                <span className="font-bold text-xl">HM</span>
               </div>
+              <h1 className="text-3xl font-bold tracking-tight text-foreground">Welcome back</h1>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Enter your credentials to access your account
+              </p>
+            </div>
 
-              <div>
-                <label className="text-slate-900 text-sm font-medium mb-2 block">
-                  Password
-                </label>
-                <div className="relative flex items-center">
-                  <input
-                    name="password"
-                    type="password"
-                    required
-                    value={form.password}
-                    onChange={handleChange}
-                    className="w-full text-slate-900 text-sm border border-slate-300 px-4 py-3 pr-8 rounded-md outline-blue-600"
-                    placeholder="Enter password"
-                  />
-                </div>
-              </div>
+            <form className="space-y-6" onSubmit={handleLogin}>
+              <Input
+                label="Username"
+                name="username"
+                type="text"
+                required
+                value={form.username}
+                onChange={handleChange}
+                placeholder="Enter your username"
+                autoComplete="username"
+              />
 
-              <div className="!mt-12">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-2 px-4 text-[15px] font-medium tracking-wide rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none cursor-pointer"
-                >
-                  {loading ? "Signing in..." : "Sign in"}
-                </button>
-              </div>
+              <Input
+                label="Password"
+                name="password"
+                type="password"
+                required
+                value={form.password}
+                onChange={handleChange}
+                placeholder="Enter your password"
+                autoComplete="current-password"
+              />
+
+              <Button
+                type="submit"
+                isLoading={loading}
+                className="w-full"
+                size="lg"
+              >
+                Sign in
+              </Button>
             </form>
+
+            <p className="px-8 text-center text-sm text-muted-foreground">
+              By clicking continue, you agree to our{" "}
+              <a href="#" className="underline underline-offset-4 hover:text-primary">
+                Terms of Service
+              </a>{" "}
+              and{" "}
+              <a href="#" className="underline underline-offset-4 hover:text-primary">
+                Privacy Policy
+              </a>
+              .
+            </p>
+          </div>
+        </div>
+
+        {/* Right Side - Visual */}
+        <div className="hidden lg:block relative bg-muted/30">
+          <div className="absolute inset-0 bg-zinc-900 border-l border-white/10" />
+          <div className="relative z-10 flex flex-col items-center justify-center h-full text-white p-12 text-center">
+            <h2 className="text-4xl font-bold mb-4">Health Manthan Admin</h2>
+            <p className="text-lg text-zinc-400 max-w-lg">
+              Manage your hospital network, doctors, and appointments efficiently with our comprehensive admin dashboard.
+            </p>
           </div>
         </div>
       </div>

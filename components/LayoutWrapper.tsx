@@ -1,8 +1,9 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import Sidebar from "@/components/Dashboard";
-import Header from "./Header";
+import Sidebar from "@/components/Sidebar";
+import { useUIStore } from "@/store/uiStore";
+import { useEffect, useState } from "react";
 
 export default function LayoutWrapper({
   children,
@@ -10,21 +11,23 @@ export default function LayoutWrapper({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-
   const isAuthPage = pathname === "/login";
+  const { isSidebarOpen } = useUIStore();
+
+  // Prevent hydration mismatch for sidebar state
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   return (
-    <>
+    <div className="flex min-h-screen bg-muted/30">
       {!isAuthPage && <Sidebar />}
 
       <main
-        className={`pb-20 bg-gray-50 min-h-screen ${
-          isAuthPage ? "" : "ml-68"
-        }`}
+        className={`flex-1 flex flex-col transition-all duration-300 ease-in-out min-h-screen ${!isAuthPage && mounted && isSidebarOpen ? "md:ml-64" : ""
+          }`}
       >
-        {/* <Header/> */}
         {children}
       </main>
-    </>
+    </div>
   );
 }
