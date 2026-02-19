@@ -142,7 +142,7 @@ export default function Sidebar() {
         <div className="flex items-center justify-between px-6 h-16 border-b border-border">
           <div className="flex items-center gap-2 font-bold text-lg tracking-tight">
             <GovernmentIcon />
-            <span className="text-primary">HealthManthan</span>
+            <span className="text-primary">Health Vandnam</span>
           </div>
 
           <button

@@ -245,11 +245,10 @@ export default function SurgeryCategoryPage() {
                         {/* Status */}
                         <td className="px-6 py-4">
                           <span
-                            className={`px-3 py-1 text-xs rounded-full ${
-                              item.status
+                            className={`px-3 py-1 text-xs rounded-full ${item.status
                                 ? "bg-green-100 text-green-700"
                                 : "bg-red-100 text-red-600"
-                            }`}
+                              }`}
                           >
                             {item.status ? "Active" : "Inactive"}
                           </span>
@@ -258,9 +257,12 @@ export default function SurgeryCategoryPage() {
                         {/* Actions */}
                         <td className="px-6 py-4">
                           <div className="flex gap-2">
-                            {/* <button className="p-2 text-blue-600 hover:bg-blue-50 rounded">
+                            <button
+                              onClick={() => router.push(`/category/add?id=${item.id}`)}
+                              className="p-2 text-blue-600 hover:bg-blue-50 rounded"
+                            >
                               <Pencil size={18} />
-                            </button> */}
+                            </button>
 
                             <button
                               onClick={(e) => {

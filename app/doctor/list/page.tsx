@@ -156,7 +156,7 @@ export default function DoctorListPage() {
 
   /* ------------------ Render ------------------ */
   return (
-    <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Toast */}
       <Toast
         show={toast.show}
@@ -171,7 +171,7 @@ export default function DoctorListPage() {
         onSearchChange={(value) => setSearch(value)}
       />
 
-      <div className="flex-1 overflow-auto p-6 md:p-8">
+      <div className="flex-1 p-6 md:p-8">
         <div className="max-w-7xl mx-auto">
           {/* Page Header */}
           <div className="mb-6 flex items-center justify-between">
@@ -332,26 +332,31 @@ export default function DoctorListPage() {
           {!loading && filteredData.length > 0 && (
             <div className="mt-6 flex items-center justify-between">
               <p className="text-sm text-gray-600">
-                Page <span className="font-semibold">{page}</span>
+                Showing <span className="font-semibold">{start + 1}</span> to{" "}
+                <span className="font-semibold">
+                  {Math.min(end, filteredData.length)}
+                </span>{" "}
+                of <span className="font-semibold">{filteredData.length}</span>{" "}
+                results
               </p>
 
               <div className="flex items-center gap-2">
                 <button
                   disabled={page === 1}
                   onClick={() => setPage(page - 1)}
-                  className="px-4 py-2 border rounded-lg disabled:opacity-50"
+                  className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition"
                 >
                   <ChevronLeft size={18} />
                 </button>
 
                 <span className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold">
-                  {page}
+                  {page} / {Math.ceil(filteredData.length / limit)}
                 </span>
 
                 <button
                   disabled={end >= filteredData.length}
                   onClick={() => setPage(page + 1)}
-                  className="px-4 py-2 border rounded-lg disabled:opacity-50"
+                  className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition"
                 >
                   <ChevronRight size={18} />
                 </button>

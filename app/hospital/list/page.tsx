@@ -10,6 +10,7 @@ import {
   ChevronRight,
   Hospital,
   Trash2,
+  Pencil,
 } from "lucide-react";
 
 import {
@@ -146,16 +147,13 @@ export default function HospitalListPage() {
 
   /* ------------------ Render ------------------ */
   return (
-    <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
-
+    <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Toast */}
       <Toast
         show={toast.show}
         message={toast.message}
         type={toast.type}
-        onClose={() =>
-          setToast({ ...toast, show: false })
-        }
+        onClose={() => setToast({ ...toast, show: false })}
       />
 
       {/* Header */}
@@ -164,28 +162,20 @@ export default function HospitalListPage() {
         onSearchChange={(value) => setSearch(value)}
       />
 
-      <div className="flex-1 overflow-auto p-6 md:p-8">
+      <div className="flex-1 p-6 md:p-8">
         <div className="max-w-7xl mx-auto">
-
           {/* Page Header */}
           <div className="mb-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-indigo-600 rounded-xl">
-                <Hospital
-                  className="text-white"
-                  size={18}
-                />
+                <Hospital className="text-white" size={18} />
               </div>
 
-              <h1 className="text-xl font-bold text-gray-900">
-                Hospital List
-              </h1>
+              <h1 className="text-xl font-bold text-gray-900">Hospital List</h1>
             </div>
 
             <button
-              onClick={() =>
-                router.push("/hospital")
-              }
+              onClick={() => router.push("/hospital")}
               className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium"
             >
               <Plus size={16} />
@@ -195,7 +185,6 @@ export default function HospitalListPage() {
 
           {/* Table Card */}
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-
             {/* Loading */}
             {loading && (
               <div className="flex flex-col items-center py-20">
@@ -203,218 +192,173 @@ export default function HospitalListPage() {
                   className="animate-spin text-indigo-600 mb-4"
                   size={40}
                 />
-                <p className="text-gray-600">
-                  Loading hospitals...
-                </p>
+                <p className="text-gray-600">Loading hospitals...</p>
               </div>
             )}
 
             {/* Empty */}
-            {!loading &&
-              paginatedData.length === 0 && (
-                <div className="flex flex-col items-center py-20">
-                  <Hospital
-                    size={48}
-                    className="text-gray-400 mb-3"
-                  />
+            {!loading && paginatedData.length === 0 && (
+              <div className="flex flex-col items-center py-20">
+                <Hospital size={48} className="text-gray-400 mb-3" />
 
-                  <p className="text-lg font-semibold">
-                    {search
-                      ? "No results found"
-                      : "No hospitals yet"}
-                  </p>
-                </div>
-              )}
+                <p className="text-lg font-semibold">
+                  {search ? "No results found" : "No hospitals yet"}
+                </p>
+              </div>
+            )}
 
             {/* Table */}
-            {!loading &&
-              paginatedData.length > 0 && (
-                <div className="overflow-x-auto">
+            {!loading && paginatedData.length > 0 && (
+              <div className="overflow-x-auto">
+                <table className="min-w-full">
+                  {/* Head */}
+                  <thead className="bg-indigo-50">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase">
+                        Image
+                      </th>
 
-                  <table className="min-w-full">
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase">
+                        Hospital
+                      </th>
 
-                    {/* Head */}
-                    <thead className="bg-gray-200">
-                      <tr>
-                        <th className="px-6 py-4 text-left text-xs font-semibold uppercase">
-                          Image
-                        </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase">
+                        City
+                      </th>
 
-                        <th className="px-6 py-4 text-left text-xs font-semibold uppercase">
-                          Hospital
-                        </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase">
+                        Contact
+                      </th>
 
-                        <th className="px-6 py-4 text-left text-xs font-semibold uppercase">
-                          City
-                        </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase">
+                        WhatsApp
+                      </th>
 
-                        <th className="px-6 py-4 text-left text-xs font-semibold uppercase">
-                          Contact
-                        </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase">
+                        Email
+                      </th>
 
-                        <th className="px-6 py-4 text-left text-xs font-semibold uppercase">
-                          WhatsApp
-                        </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase">
+                        Location
+                      </th>
 
-                        <th className="px-6 py-4 text-left text-xs font-semibold uppercase">
-                          Email
-                        </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
 
-                        <th className="px-6 py-4 text-left text-xs font-semibold uppercase">
-                          Location
-                        </th>
+                  {/* Body */}
+                  <tbody className="divide-y">
+                    {paginatedData.map((item, index) => (
+                      <tr
+                        key={item._id}
+                        onClick={() => router.push(`/hospital/${item._id}`)}
+                        className="hover:bg-indigo-50 cursor-pointer transition"
+                      >
+                        {/* Image */}
+                        <td className="px-6 py-4">
+                          {item.imageUrls?.length ? (
+                            <img
+                              src={item.imageUrls[0]}
+                              alt="hospital"
+                              className="w-12 h-12 rounded-lg object-cover"
+                            />
+                          ) : (
+                            <Image className="text-gray-400" />
+                          )}
+                        </td>
 
-                        <th className="px-6 py-4 text-left text-xs font-semibold uppercase">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
+                        {/* Name */}
+                        <td className="px-6 py-4">
+                          <p className="font-semibold">{item.hospitalName}</p>
 
-                    {/* Body */}
-                    <tbody className="divide-y">
+                          <p className="text-xs text-gray-500">
+                            Hospital #{start + index + 1}
+                          </p>
+                        </td>
 
-                      {paginatedData.map(
-                        (item, index) => (
-                          <tr
-                            key={item._id}
-                            onClick={() =>
-                              router.push(
-                                `/hospital/${item._id}`,
-                              )
-                            }
-                            className="hover:bg-indigo-50 cursor-pointer transition"
-                          >
-                            {/* Image */}
-                            <td className="px-6 py-4">
-                              {item.imageUrls
-                                ?.length ? (
-                                <img
-                                  src={
-                                    item.imageUrls[0]
-                                  }
-                                  alt="hospital"
-                                  className="w-12 h-12 rounded-lg object-cover"
-                                />
-                              ) : (
-                                <Image className="text-gray-400" />
-                              )}
-                            </td>
+                        <td className="px-6 py-4">{item.city}</td>
 
-                            {/* Name */}
-                            <td className="px-6 py-4">
-                              <p className="font-semibold">
-                                {item.hospitalName}
-                              </p>
+                        <td className="px-6 py-4">{item.contactNumber}</td>
 
-                              <p className="text-xs text-gray-500">
-                                Hospital #
-                                {start + index + 1}
-                              </p>
-                            </td>
+                        <td className="px-6 py-4">{item.whatsapp}</td>
 
-                            <td className="px-6 py-4">
-                              {item.city}
-                            </td>
+                        <td className="px-6 py-4 max-w-[180px] truncate">
+                          {item.email}
+                        </td>
 
-                            <td className="px-6 py-4">
-                              {item.contactNumber}
-                            </td>
-
-                            <td className="px-6 py-4">
-                              {item.whatsapp}
-                            </td>
-
-                            <td className="px-6 py-4 max-w-[180px] truncate">
-                              {item.email}
-                            </td>
-
-                            <td className="px-6 py-4 max-w-[200px] truncate">
-                              {item.location}
-                            </td>
+                        <td className="px-6 py-4 max-w-[200px] truncate">
+                          {item.location}
+                        </td>
 
                         {/* Actions */}
-                        <td className="px-6 py-4 space-x-2">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              router.push(`/hospital?id=${item._id}`);
-                            }}
-                            className="px-3 py-1 text-xs rounded bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDeleteId(item._id);
-                            }}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded"
-                          >
-                            <Trash2 size={18} />
-                          </button>
+                        <td className="px-6 py-4">
+                          <div className="flex gap-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                router.push(`/hospital?id=${item._id}`);
+                              }}
+                              className="inline-flex items-center gap-1 px-3 py-1 text-xs rounded bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
+                            >
+                              <Pencil size={14} />
+                              Edit
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDeleteId(item._id);
+                              }}
+                              className="p-2 text-red-600 hover:bg-red-50 rounded transition"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
                         </td>
-                          </tr>
-                        ),
-                      )}
-
-                    </tbody>
-                  </table>
-
-                </div>
-              )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
 
           {/* Pagination */}
-          {!loading &&
-            filteredData.length > 0 && (
-              <div className="mt-6 flex items-center justify-between">
+          {!loading && filteredData.length > 0 && (
+            <div className="mt-6 flex items-center justify-between">
+              <p className="text-sm text-gray-600">
+                Showing <span className="font-semibold">{start + 1}</span> to{" "}
+                <span className="font-semibold">
+                  {Math.min(end, filteredData.length)}
+                </span>{" "}
+                of <span className="font-semibold">{filteredData.length}</span>{" "}
+                results
+              </p>
 
-                <p className="text-sm text-gray-600">
-                  Page{" "}
-                  <span className="font-semibold">
-                    {page}
-                  </span>
-                </p>
+              <div className="flex items-center gap-2">
+                <button
+                  disabled={page === 1}
+                  onClick={() => setPage(page - 1)}
+                  className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition"
+                >
+                  <ChevronLeft size={18} />
+                </button>
 
-                <div className="flex items-center gap-2">
+                <span className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold">
+                  {page} / {Math.ceil(filteredData.length / limit)}
+                </span>
 
-                  {/* Prev */}
-                  <button
-                    disabled={page === 1}
-                    onClick={() =>
-                      setPage(page - 1)
-                    }
-                    className="px-4 py-2 rounded-lg disabled:opacity-50"
-                  >
-                    <ChevronLeft
-                      size={18}
-                    />
-                  </button>
-
-                  {/* Current */}
-                  <span className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold">
-                    {page}
-                  </span>
-
-                  {/* Next */}
-                  <button
-                    disabled={
-                      end >=
-                      filteredData.length
-                    }
-                    onClick={() =>
-                      setPage(page + 1)
-                    }
-                    className="px-4 py-2 rounded-lg disabled:opacity-50"
-                  >
-                    <ChevronRight
-                      size={18}
-                    />
-                  </button>
-
-                </div>
+                <button
+                  disabled={end >= filteredData.length}
+                  onClick={() => setPage(page + 1)}
+                  className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition"
+                >
+                  <ChevronRight size={18} />
+                </button>
               </div>
-            )}
+            </div>
+          )}
         </div>
       </div>
 
